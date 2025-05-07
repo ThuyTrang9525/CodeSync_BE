@@ -8,7 +8,7 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Model
 {
-    protected $table = 'user';
+    protected $table = 'users';
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
