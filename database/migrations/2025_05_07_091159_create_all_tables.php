@@ -31,6 +31,13 @@ return new class extends Migration {
     
         Schema::create('teachers', function (Blueprint $table) {
             $table->unsignedBigInteger('userID')->primary();
+            $table->date('dateOfBirth')->nullable();
+            $table->string('gender')->nullable();
+            $table->string('address')->nullable();
+            $table->string('phoneNumber')->nullable();
+            $table->string('avatarURL')->nullable();
+            $table->date('enrollmentDate')->nullable();
+            $table->text('bio')->nullable();
             $table->foreign('userID')->references('userID')->on('users')->onDelete('cascade');
         });
     

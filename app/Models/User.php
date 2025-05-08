@@ -30,7 +30,7 @@ class User extends Model
      * @var list<string>
      */
     protected $hidden = [
-        'password',
+        // 'password',
         'remember_token',
     ];
 
