@@ -1,17 +1,20 @@
 <?php
 
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Model;
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens; // Thêm trait này
 
 class User extends Model
 {
-    protected $table = 'users';
+    use HasApiTokens, HasFactory, Notifiable; // Thêm HasApiTokens vào đây
 
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    protected $table = 'users';
+    protected $primaryKey = 'userID';
+public $incrementing = true;
+protected $keyType = 'int';
 
     /**
      * The attributes that are mass assignable.
@@ -19,9 +22,9 @@ class User extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'name',
         'email',
         'password',
+        'role'
     ];
 
     /**
@@ -30,7 +33,6 @@ class User extends Model
      * @var list<string>
      */
     protected $hidden = [
-        // 'password',
         'remember_token',
     ];
 
@@ -46,6 +48,7 @@ class User extends Model
             'password' => 'hashed',
         ];
     }
+
     public function student()
     {
         return $this->hasOne(Student::class, 'user_id', 'id');
