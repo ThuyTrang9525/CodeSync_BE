@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
-use App\Models\User;
-use App\Models\Student;
+namespace App\Http\Controllers\Api;
+use App\Http\Controllers\Controller;    
 use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Student; 
 
-class AdminDashboardController extends Controller
+class AdminController extends Controller
 {
+    // Lấy thông tin thống kê cho admin
     public function getStats()
     {
         $teachers = User::where('role', 'teacher')->count(); // hoặc kiểm tra theo role_id
