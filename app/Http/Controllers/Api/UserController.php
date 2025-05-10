@@ -68,40 +68,42 @@ class UserController extends Controller
         return response()->json(['message' => 'User deleted successfully']);
     }
 
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required',
-            'role'     => 'required|in:STUDENT,TEACHER'
-        ]);
+public function login(Request $request)
+{
+    $request->validate([
+        'email'    => 'required|email',
+        'password' => 'required',
+        'role'     => 'required|in:STUDENT,TEACHER'
+    ]);
 
-        $user = User::where('email', $request->email)
-                    ->where('role', $request->role)
-                    ->first();
+    $user = User::where('email', $request->email)
+                ->where('role', $request->role)
+                ->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Email, mật khẩu hoặc vai trò không đúng.'
-            ], 401);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        // Thông tin phụ theo vai trò
-        $extraData = null;
-
-        if ($user->role === 'STUDENT') {
-            $extraData = Student::where('userID', $user->userID)->first();
-        } elseif ($user->role === 'TEACHER') {
-            $extraData = Teacher::where('userID', $user->userID)->first();
-        }
-
-        return response()->json([
-            'access_token' => $token,
-            'token_type'   => 'Bearer',
-            'user'         => $user,
-            'profile'      => $extraData
-        ]);
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
     }
+
+    if (!Hash::check($request->password, $user->password)) {
+        return response()->json(['message' => 'Invalid password'], 401);
+    }
+
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    $extraData = null;
+
+    if ($user->role === 'STUDENT') {
+        $extraData = Student::where('userID', $user->userID)->first();
+    } elseif ($user->role === 'TEACHER') {
+        $extraData = Teacher::where('userID', $user->userID)->first();
+    }
+
+    return response()->json([
+        'access_token' => $token,
+        'token_type'   => 'Bearer',
+        'user'         => $user,
+        'profile'      => $extraData
+    ]);
+}
+
 }
