@@ -12,5 +12,6 @@ Route::apiResource('/users', UserController::class);
 Route::apiResource('/students', StudentController::class);
 Route::apiResource('/teachers', TeacherController::class);
 
+
 Route::post('/login', [UserController::class, 'login']);
 Route::get('/dashboard', [AdminController::class, 'getStats']);

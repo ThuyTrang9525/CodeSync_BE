@@ -8,62 +8,64 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id('userID');
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->enum('role', ['ADMIN', 'TEACHER', 'STUDENT']);
-            $table->timestamps();
-        });
-    
-        // 2. students, teachers, admins (phụ thuộc users)
-        Schema::create('students', function (Blueprint $table) {
-            $table->unsignedBigInteger('userID')->primary();
-            $table->date('dateOfBirth')->nullable();
-            $table->string('gender')->nullable();
-            $table->string('address')->nullable();
-            $table->string('phoneNumber')->nullable();
-            $table->string('avatarURL')->nullable();
-            $table->date('enrollmentDate')->nullable();
-            $table->text('bio')->nullable();
-            $table->foreign('userID')->references('userID')->on('users')->onDelete('cascade');
-        });
-    
-        Schema::create('teachers', function (Blueprint $table) {
-            $table->unsignedBigInteger('userID')->primary();
-            $table->date('dateOfBirth')->nullable();
-            $table->string('gender')->nullable();
-            $table->string('address')->nullable();
-            $table->string('phoneNumber')->nullable();
-            $table->string('avatarURL')->nullable();
-            $table->date('enrollmentDate')->nullable();
-            $table->text('bio')->nullable();
-            $table->foreign('userID')->references('userID')->on('users')->onDelete('cascade');
-        });
-    
-        Schema::create('admins', function (Blueprint $table) {
-            $table->unsignedBigInteger('userID')->primary();
-            $table->foreign('userID')->references('userID')->on('users')->onDelete('cascade');
-        });
-    
-        // 3. class_groups (phụ thuộc teachers)
-        Schema::create('class_groups', function (Blueprint $table) {
-            $table->id('classID');
-            $table->string('className');
-            $table->unsignedBigInteger('teacherID')->nullable(); // Vì SET NULL
-            $table->foreign('teacherID')->references('userID')->on('teachers')->onDelete('set null');
-            $table->timestamps();
-        });
-    
-        // 4. class_group_student (phụ thuộc class_groups + students)
-        Schema::create('class_group_student', function (Blueprint $table) {
-            $table->unsignedBigInteger('classID');
-            $table->unsignedBigInteger('studentID');
-            $table->primary(['classID', 'studentID']);
-            $table->foreign('classID')->references('classID')->on('class_groups')->onDelete('cascade');
-            $table->foreign('studentID')->references('userID')->on('students')->onDelete('cascade');
-        });
-    
+    $table->id('userID');
+    $table->string('name');
+    $table->string('email')->unique();
+    $table->string('password');
+    $table->enum('role', ['ADMIN', 'TEACHER', 'STUDENT']);
+    $table->timestamps();
+});
+
+// 2. students, teachers, admins (phụ thuộc users)
+Schema::create('students', function (Blueprint $table) {
+    $table->unsignedBigInteger('userID')->primary();
+    $table->unsignedBigInteger('studentID')->unique(); // New column for studentID
+    $table->date('dateOfBirth')->nullable();
+    $table->string('gender')->nullable();
+    $table->string('address')->nullable();
+    $table->string('phoneNumber')->nullable();
+    $table->string('avatarURL')->nullable();
+    $table->date('enrollmentDate')->nullable();
+    $table->text('bio')->nullable();
+    $table->foreign('userID')->references('userID')->on('users')->onDelete('cascade');
+});
+
+Schema::create('teachers', function (Blueprint $table) {
+    $table->unsignedBigInteger('userID')->primary();
+    $table->unsignedBigInteger('teacherID')->unique(); // New column for teacherID
+    $table->date('dateOfBirth')->nullable();
+    $table->string('gender')->nullable();
+    $table->string('address')->nullable();
+    $table->string('phoneNumber')->nullable();
+    $table->string('avatarURL')->nullable();
+    $table->date('enrollmentDate')->nullable();
+    $table->text('bio')->nullable();
+    $table->foreign('userID')->references('userID')->on('users')->onDelete('cascade');
+});
+
+Schema::create('admins', function (Blueprint $table) {
+    $table->unsignedBigInteger('userID')->primary();
+    $table->foreign('userID')->references('userID')->on('users')->onDelete('cascade');
+});
+
+// 3. class_groups (phụ thuộc teachers)
+Schema::create('class_groups', function (Blueprint $table) {
+    $table->id('classID');
+    $table->string('className');
+    $table->unsignedBigInteger('teacherID')->nullable(); // Vì SET NULL
+    $table->foreign('teacherID')->references('teacherID')->on('teachers')->onDelete('set null');
+    $table->timestamps();
+});
+
+// 4. class_group_student (phụ thuộc class_groups + students)
+Schema::create('class_group_student', function (Blueprint $table) {
+    $table->unsignedBigInteger('classID');
+    $table->unsignedBigInteger('studentID');
+    $table->primary(['classID', 'studentID']);
+    $table->foreign('classID')->references('classID')->on('class_groups')->onDelete('cascade');
+    $table->foreign('studentID')->references('studentID')->on('students')->onDelete('cascade');
+});
+
         // 5. journal_entries (phụ thuộc students)
         Schema::create('journal_entries', function (Blueprint $table) {
             $table->id('entryID');

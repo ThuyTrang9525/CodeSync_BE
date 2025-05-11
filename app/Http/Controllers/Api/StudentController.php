@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Student;
 use Illuminate\Http\Request;
 
+
 class StudentController extends Controller
 {
     // GET /api/students
@@ -69,4 +70,6 @@ class StudentController extends Controller
         $s->delete();
         return response()->json(['message'=>'Deleted']);
     }
+ 
+
 }

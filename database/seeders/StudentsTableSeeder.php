@@ -11,7 +11,8 @@ class StudentsTableSeeder extends Seeder
     {
         DB::table('students')->insert([
             [
-                'userID' => 1,
+                'userID' => 1, // Student userID đã được tạo tự động trong bảng users
+                'studentID' => 101,
                 'dateOfBirth' => '2000-05-10',
                 'gender' => 'Male',
                 'address' => '123 Nguyễn Văn Cừ, Quận 5, TP.HCM',
@@ -21,7 +22,8 @@ class StudentsTableSeeder extends Seeder
                 'bio' => 'Yêu thích lập trình và công nghệ.',
             ],
             [
-                'userID' => 2,
+                'userID' => 2, // Student userID đã được tạo tự động trong bảng users
+                'studentID' => 102,
                 'dateOfBirth' => '2001-11-22',
                 'gender' => 'Female',
                 'address' => '456 Trần Hưng Đạo, Quận 1, TP.HCM',
@@ -30,7 +32,6 @@ class StudentsTableSeeder extends Seeder
                 'enrollmentDate' => '2023-01-15',
                 'bio' => 'Thích đọc sách, vẽ tranh và học ngôn ngữ.',
             ],
-            
         ]);
     }
 }

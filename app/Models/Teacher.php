@@ -12,4 +12,9 @@ class Teacher extends Model
     {
         return $this->belongsTo(User::class, 'id');
     }
+    public function classGroups()
+{
+    return $this->hasMany(ClassGroup::class, 'teacherID');
+}
+
 }
