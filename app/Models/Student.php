@@ -29,4 +29,8 @@ class Student extends Model
         return $this->belongsTo(ClassGroup::class, 'class_group_student', 'studentID', 'classID');
     }
 
+    public function goals()
+    {
+        return $this->hasMany(Goal::class, 'studentID', 'userID');
+    }
 }

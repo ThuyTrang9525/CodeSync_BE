@@ -94,6 +94,7 @@ Schema::create('class_group_student', function (Blueprint $table) {
             $table->text('description');
             $table->string('semester');
             $table->date('deadline');
+            $table->enum('status', ['not-started', 'in-progress', 'completed'])->default('not-started');
             $table->foreign('studentID')->references('userID')->on('students')->onDelete('cascade');
         });
     
