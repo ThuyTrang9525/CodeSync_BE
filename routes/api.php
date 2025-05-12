@@ -14,4 +14,4 @@ Route::apiResource('/teachers', TeacherController::class);
 
 
 Route::post('/login', [UserController::class, 'login']);
-Route::get('/dashboard', [AdminController::class, 'getStats']);
+Route::get('/stats', [AdminController::class, 'getStats']);

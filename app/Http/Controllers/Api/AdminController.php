@@ -19,6 +19,13 @@ class AdminController extends Controller
             'teachers' => $teachers,
             'students' => $students,
             'classes' => $classes,
-            ]);
+            ]
+        );
+    }
+
+    public function getUsers()
+    {
+        $users = User::all();
+        return response()->json($users);
     }
 }

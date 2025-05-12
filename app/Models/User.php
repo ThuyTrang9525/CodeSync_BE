@@ -22,6 +22,7 @@ protected $keyType = 'int';
      * @var list<string>
      */
     protected $fillable = [
+        'name',
         'email',
         'password',
         'role'
