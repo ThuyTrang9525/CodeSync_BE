@@ -2,20 +2,17 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class TeachersTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         DB::table('teachers')->insert([
             [
-                'userID' => 3,
+                'userID' => 3, // Teacher userID đã được tạo tự động trong bảng users
+                'teacherID' => 1, 
                 'dateOfBirth' => '2000-05-10',
                 'gender' => 'Male',
                 'address' => '123 Nguyễn Văn Cừ, Quận 5, TP.HCM',

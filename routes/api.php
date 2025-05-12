@@ -12,8 +12,9 @@ Route::apiResource('/users', UserController::class);
 Route::apiResource('/students', StudentController::class);
 Route::apiResource('/teachers', TeacherController::class);
 
-Route::post('/login', [UserController::class, 'login'])->name('login');
-Route::get('/dashboard', [AdminController::class, 'getStats']);
+
+Route::post('/login', [UserController::class, 'login']);
+Route::get('/stats', [AdminController::class, 'getStats']);
 
 // Goal routes - protected by authentication
 Route::middleware('auth:sanctum')->group(function () {

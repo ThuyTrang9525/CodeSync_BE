@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Student;
 use App\Models\Teacher;
-
+use Illuminate\Validation\Rule;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -33,31 +33,45 @@ class UserController extends Controller
             'name' => 'required|string',
             'email' => 'required|string|email|unique:users,email',
             'password' => 'required|string|min:6',
+            'role' => 'required|in:STUDENT,TEACHER,ADMIN',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
+            'role' => $request->role,
         ]);
 
         return response()->json($user, 201);  // Trả về người dùng vừa tạo
     }
 
     // Cập nhật thông tin người dùng
-    public function update(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
+public function update(Request $request, $id)
+{
+    $user = User::findOrFail($id);
 
-        $request->validate([
-            'name' => 'string',
-            'email' => 'email|unique:users,email,' . $id,
-            'password' => 'string|min:6',
-        ]);
+    $request->validate([
+        'name' => 'string',
+        'email' => [
+            'email',
+            Rule::unique('users', 'email')->ignore($id, 'userID'),
+        ],
+        'password' => 'nullable|string|min:6',
+        'role' => 'in:STUDENT,TEACHER,ADMIN',
+    ]);
 
-        $user->update($request->all());
-        return response()->json($user);
+    $data = $request->only(['name', 'email', 'role']);
+
+    if ($request->filled('password')) {
+        $data['password'] = bcrypt($request->password);
     }
+
+    $user->update($data);
+
+    return response()->json($user);
+}
+
 
     // Xóa một người dùng
     public function destroy($id)
