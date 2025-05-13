@@ -122,8 +122,9 @@ public function login(Request $request)
         'token_type'   => 'Bearer',
         'user'         => $user,
         'profile'      => $extraData,
-        'classes'      => $classes,
+        ...($user->role === 'TEACHER' ? ['classes' => $classes] : []),
     ]);
+
 }
 
 }
