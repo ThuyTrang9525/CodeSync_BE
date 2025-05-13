@@ -8,6 +8,8 @@ use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Validation\Rule;
 use App\Models\User;
+use App\Models\ClassGroup;
+
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -110,13 +112,17 @@ public function login(Request $request)
         $extraData = Student::where('userID', $user->userID)->first();
     } elseif ($user->role === 'TEACHER') {
         $extraData = Teacher::where('userID', $user->userID)->first();
+        if ($extraData) {
+            $classes = ClassGroup::where('teacherID', $extraData->userID)->get();
+        }
     }
 
     return response()->json([
         'access_token' => $token,
         'token_type'   => 'Bearer',
         'user'         => $user,
-        'profile'      => $extraData
+        'profile'      => $extraData,
+        'classes'      => $classes,
     ]);
 }
 
