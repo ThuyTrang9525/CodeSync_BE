@@ -33,3 +33,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/goals/{goal}', [StudentController::class, 'updateGoal']);
     Route::delete('/goals/{goal}', [StudentController::class, 'destroyGoal']);
 });
+// Teacher
+Route::middleware('auth:sanctum')->get('/teacher/classes', [TeacherController::class, 'getTeacherClasses']);
