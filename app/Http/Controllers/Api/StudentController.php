@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use App\Models\Goal;
+use App\Models\StudyPlan;
 use App\Http\Resources\GoalResource;
 use Illuminate\Support\Facades\Auth;
 
