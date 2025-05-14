@@ -7,6 +7,7 @@ use App\Models\Student;
 use App\Models\ClassGroup;
 use Illuminate\Http\Request;
 use App\Models\Goal;
+use App\Models\StudyPlan;
 use App\Http\Resources\GoalResource;
 use Illuminate\Support\Facades\Auth;
 
@@ -99,7 +100,7 @@ class StudentController extends Controller
     }
 
     // Query goals for the student
-    $query = Goal::where('studentID', $student->userID);
+    $query = Goal::where('userID', $student->userID);
 
     // Optional semester filter
     if ($request->has('semester')) {
@@ -131,7 +132,7 @@ class StudentController extends Controller
         }
         
         // Get distinct semesters for the student
-        $semesters = Goal::where('studentID', $user->userID)
+        $semesters = Goal::where('userID', $user->userID)
             ->select('semester')
             ->distinct()
             ->orderBy('semester')
@@ -154,7 +155,7 @@ class StudentController extends Controller
         }
         
         // Get goals for the specified semester
-        $goals = Goal::where('studentID', $user->userID)
+        $goals = Goal::where('userID', $user->userID)
             ->where('semester', $semester)
             ->get();
         
@@ -164,35 +165,35 @@ class StudentController extends Controller
     /**
      * Store a newly created goal.
      */
-    public function storeGoal(Request $request)
+public function storeGoal(Request $request)
 {
-    // Get the authenticated user
-    $user = Auth::user();
-    
-    // Check if the user is a student
+    $user = Auth::user();  // Get the authenticated user
     if ($user->role !== 'STUDENT') {
         return response()->json(['message' => 'Only students can create goals'], 403);
     }
-    
+
+    // Gán validate vào biến $validated
     $validated = $request->validate([
+        'title' => 'required|string',
         'description' => 'required|string',
         'semester' => 'required|string',
         'deadline' => 'required|date',
     ]);
 
-    // Set the default status to 'not started' if not provided
     $status = $request->has('status') ? $request->status : 'not-started';
 
     $goal = Goal::create([
-        'title' => $request->input('title'), // Assuming title is also provided
-        'studentID' => $user->userID,
+        'title' => $validated['title'],
+        'userID' => $user->userID,
         'description' => $validated['description'],
         'semester' => $validated['semester'],
         'deadline' => $validated['deadline'],
-        'status' => $status, // Set the default status here
+        'status' => $status,
     ]);
-        return new GoalResource($goal);
-    }
+    return new GoalResource($goal);
+}
+
+
 
     /**
      * Display the specified goal.
@@ -203,7 +204,7 @@ class StudentController extends Controller
         $user = Auth::user();
         
         // Check if the goal belongs to the authenticated student
-        if ($user->role !== 'STUDENT' || $goal->studentID !== $user->userID) {
+        if ($user->role !== 'STUDENT' || $goal->userID !== $user->userID) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -219,7 +220,7 @@ class StudentController extends Controller
         $user = Auth::user();
         
         // Check if the goal belongs to the authenticated student
-        if ($user->role !== 'STUDENT' || $goal->studentID !== $user->userID) {
+        if ($user->role !== 'STUDENT' || $goal->userID !== $user->userID) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -244,7 +245,7 @@ class StudentController extends Controller
         $user = Auth::user();
         
         // Check if the goal belongs to the authenticated student
-        if ($user->role !== 'STUDENT' || $goal->studentID !== $user->userID) {
+        if ($user->role !== 'STUDENT' || $goal->userID !== $user->userID) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

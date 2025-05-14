@@ -16,7 +16,7 @@ class Goal extends Model
     protected $fillable = [
         'title',
         'goalID',
-        'studentID',
+        'userID',
         'description',
         'semester',
         'deadline',
@@ -30,6 +30,6 @@ class Goal extends Model
 
     public function student()
     {
-        return $this->belongsTo(Student::class, 'studentID', 'userID');
+        return $this->belongsTo(Student::class, 'userID', 'userID');
     }
 }
