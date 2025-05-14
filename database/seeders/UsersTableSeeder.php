@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UsersTableSeeder extends Seeder
 {
@@ -14,7 +15,7 @@ class UsersTableSeeder extends Seeder
             [
                 'name' => 'Nguyễn Văn A',
                 'email' => 'a@example.com',
-                'password' => 'password1',
+                'password' =>Hash::make('123123'),
                 'role' => 'STUDENT',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -22,7 +23,7 @@ class UsersTableSeeder extends Seeder
             [
                 'name' => 'Trần Thị B',
                 'email' => 'b@example.com',
-                'password' => 'password2',
+                'password' => Hash::make('123123'),
                 'role' => 'STUDENT',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -30,7 +31,7 @@ class UsersTableSeeder extends Seeder
             [
                 'name' => 'Lê Văn C',
                 'email' => 'c@example.com',
-                'password' => 'password3',
+                'password' =>Hash::make('123123'),
                 'role' => 'TEACHER',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -38,7 +39,7 @@ class UsersTableSeeder extends Seeder
             [
                 'name' => 'Lê Văn D',
                 'email' => 'd@example.com',
-                'password' => 'password4',
+                'password' =>Hash::make('123123'),
                 'role' => 'TEACHER',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -46,7 +47,7 @@ class UsersTableSeeder extends Seeder
             [
                 'name' => 'Lê Văn E',
                 'email' => 'e@example.com',
-                'password' => 'password5',
+                'password' =>Hash::make('123123'),
                 'role' => 'TEACHER',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -54,7 +55,7 @@ class UsersTableSeeder extends Seeder
             [
                 'name' => 'Admin Hệ thống',
                 'email' => 'admin@example.com',
-                'password' => 'admin123',
+                'password' =>Hash::make('123123'),
                 'role' => 'ADMIN',
                 'created_at' => now(),
                 'updated_at' => now(),
