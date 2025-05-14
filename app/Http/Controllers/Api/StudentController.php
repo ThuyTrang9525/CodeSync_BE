@@ -22,7 +22,7 @@ class StudentController extends Controller
     public function show($id)
     {
         $s = Student::find($id);
-        if (!$s) return response()->json(['message'=>'Not found'],404);
+        if (!$s) return response()->json(['message' => 'Not found'], 404);
         return response()->json($s);
     }
 
@@ -48,7 +48,7 @@ class StudentController extends Controller
     public function update(Request $req, $id)
     {
         $s = Student::find($id);
-        if (!$s) return response()->json(['message'=>'Not found'],404);
+        if (!$s) return response()->json(['message' => 'Not found'], 404);
 
         $data = $req->validate([
             'userID'         => 'sometimes|exists:users,id',
@@ -69,47 +69,47 @@ class StudentController extends Controller
     public function destroy($id)
     {
         $s = Student::find($id);
-        if (!$s) return response()->json(['message'=>'Not found'],404);
+        if (!$s) return response()->json(['message' => 'Not found'], 404);
         $s->delete();
-        return response()->json(['message'=>'Deleted']);
+        return response()->json(['message' => 'Deleted']);
     }
 
 
     public function getGoals(Request $request)
-{
-    // Get the authenticated user
-    $user = Auth::user();
-    
-    // Check if the user is a student
-    if ($user->role !== 'STUDENT') {
-        return response()->json(['message' => 'Only students can access goals'], 403);
+    {
+        // Get the authenticated user
+        $user = Auth::user();
+
+        // Check if the user is a student
+        if ($user->role !== 'STUDENT') {
+            return response()->json(['message' => 'Only students can access goals'], 403);
+        }
+
+        // Get the student record
+        $student = Student::where('userID', $user->userID)->first();
+
+        if (!$student) {
+            return response()->json(['message' => 'Student record not found'], 404);
+        }
+
+        // Query goals for the student
+        $query = Goal::where('studentID', $student->userID);
+
+        // Optional semester filter
+        if ($request->has('semester')) {
+            $query->where('semester', $request->semester);
+        }
+
+        // Optional status filter
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Get the goals
+        $goals = $query->get();
+
+        return GoalResource::collection($goals);
     }
-    
-    // Get the student record
-    $student = Student::where('userID', $user->userID)->first();
-    
-    if (!$student) {
-        return response()->json(['message' => 'Student record not found'], 404);
-    }
-
-    // Query goals for the student
-    $query = Goal::where('studentID', $student->userID);
-
-    // Optional semester filter
-    if ($request->has('semester')) {
-        $query->where('semester', $request->semester);
-    }
-
-    // Optional status filter
-    if ($request->has('status')) {
-        $query->where('status', $request->status);
-    }
-
-    // Get the goals
-    $goals = $query->get();
-
-    return GoalResource::collection($goals);
-}
 
     /**
      * Display a list of all semesters with goals.
@@ -118,19 +118,19 @@ class StudentController extends Controller
     {
         // Get the authenticated user
         $user = Auth::user();
-        
+
         // Check if the user is a student
         if ($user->role !== 'STUDENT') {
             return response()->json(['message' => 'Only students can access goals'], 403);
         }
-        
+
         // Get distinct semesters for the student
         $semesters = Goal::where('studentID', $user->userID)
             ->select('semester')
             ->distinct()
             ->orderBy('semester')
             ->pluck('semester');
-        
+
         return response()->json(['semesters' => $semesters]);
     }
 
@@ -141,17 +141,17 @@ class StudentController extends Controller
     {
         // Get the authenticated user
         $user = Auth::user();
-        
+
         // Check if the user is a student
         if ($user->role !== 'STUDENT') {
             return response()->json(['message' => 'Only students can access goals'], 403);
         }
-        
+
         // Get goals for the specified semester
         $goals = Goal::where('studentID', $user->userID)
             ->where('semester', $semester)
             ->get();
-        
+
         return GoalResource::collection($goals);
     }
 
@@ -159,32 +159,32 @@ class StudentController extends Controller
      * Store a newly created goal.
      */
     public function storeGoal(Request $request)
-{
-    // Get the authenticated user
-    $user = Auth::user();
-    
-    // Check if the user is a student
-    if ($user->role !== 'STUDENT') {
-        return response()->json(['message' => 'Only students can create goals'], 403);
-    }
-    
-    $validated = $request->validate([
-        'description' => 'required|string',
-        'semester' => 'required|string',
-        'deadline' => 'required|date',
-    ]);
+    {
+        // Get the authenticated user
+        $user = Auth::user();
 
-    // Set the default status to 'not started' if not provided
-    $status = $request->has('status') ? $request->status : 'not-started';
+        // Check if the user is a student
+        if ($user->role !== 'STUDENT') {
+            return response()->json(['message' => 'Only students can create goals'], 403);
+        }
 
-    $goal = Goal::create([
-        'title' => $request->input('title'), // Assuming title is also provided
-        'studentID' => $user->userID,
-        'description' => $validated['description'],
-        'semester' => $validated['semester'],
-        'deadline' => $validated['deadline'],
-        'status' => $status, // Set the default status here
-    ]);
+        $validated = $request->validate([
+            'description' => 'required|string',
+            'semester' => 'required|string',
+            'deadline' => 'required|date',
+        ]);
+
+        // Set the default status to 'not started' if not provided
+        $status = $request->has('status') ? $request->status : 'not-started';
+
+        $goal = Goal::create([
+            'title' => $request->input('title'), // Assuming title is also provided
+            'studentID' => $user->userID,
+            'description' => $validated['description'],
+            'semester' => $validated['semester'],
+            'deadline' => $validated['deadline'],
+            'status' => $status, // Set the default status here
+        ]);
         return new GoalResource($goal);
     }
 
@@ -195,7 +195,7 @@ class StudentController extends Controller
     {
         // Get the authenticated user
         $user = Auth::user();
-        
+
         // Check if the goal belongs to the authenticated student
         if ($user->role !== 'STUDENT' || $goal->studentID !== $user->userID) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -211,7 +211,7 @@ class StudentController extends Controller
     {
         // Get the authenticated user
         $user = Auth::user();
-        
+
         // Check if the goal belongs to the authenticated student
         if ($user->role !== 'STUDENT' || $goal->studentID !== $user->userID) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -236,7 +236,7 @@ class StudentController extends Controller
     {
         // Get the authenticated user
         $user = Auth::user();
-        
+
         // Check if the goal belongs to the authenticated student
         if ($user->role !== 'STUDENT' || $goal->studentID !== $user->userID) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -245,5 +245,35 @@ class StudentController extends Controller
         $goal->delete();
 
         return response()->json(['message' => 'Goal deleted successfully']);
+    }
+
+    // API: Lấy danh sách lớp học của sinh viên
+    public function getClasses()
+    {
+        $user = Auth::user();
+
+        // Chỉ cho phép tài khoản sinh viên truy cập
+        if ($user->role !== 'STUDENT') {
+            return response()->json([
+                'message' => 'Chỉ sinh viên mới được phép truy cập danh sách lớp học.'
+            ], 403);
+        }
+
+        // Tìm sinh viên dựa trên userID
+        $student = Student::where('userID', $user->userID)->first();
+
+        if (!$student) {
+            return response()->json([
+                'message' => 'Không tìm thấy thông tin sinh viên.'
+            ], 404);
+        }
+
+        // Lấy danh sách lớp học có kèm thông tin giáo viên
+        $classes = $student->classGroups()->with('teacher.user')->get();
+
+        return response()->json([
+            'student' => $user->name ?? $user->email, // tuỳ bạn muốn hiện thông tin nào
+            'classes' => $classes
+        ]);
     }
 }
