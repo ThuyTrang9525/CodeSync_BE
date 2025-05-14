@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\ClassGroup;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Models\Goal;
 
 class AdminController extends Controller
 {
@@ -23,6 +24,11 @@ class AdminController extends Controller
             'students' => $students,
             'classes' => $classes,
         ]);
+    }
+
+    public function getGoals(){
+        $goals = Goal::with('user')->get();
+        return response()->json($goals);
     }
 
     //////////////////////////////////////////////////////////////////////// User

@@ -41,4 +41,5 @@ Route::prefix('admin')->group(function () {
     Route::delete('classes/{id}', [AdminController::class, 'destroyClass']);
 
     Route::get('stats', [AdminController::class, 'getStats']);
+    Route::get('goals', [AdminController::class, 'getGoals']);
 });

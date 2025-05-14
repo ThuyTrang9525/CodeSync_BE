@@ -57,5 +57,9 @@ protected $keyType = 'int';
     public function classGroups() {
     return $this->hasMany(ClassGroup::class, 'userID');
 }
+public function goal()
+    {
+        return $this->hasOne(Goal::class, 'usesID');
+    }
 
 }
