@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Student;
+use App\Models\ClassGroup;
 use Illuminate\Http\Request;
 use App\Models\Goal;
 use App\Http\Resources\GoalResource;
@@ -16,6 +17,11 @@ class StudentController extends Controller
     public function index()
     {
         return response()->json(Student::all());
+    }
+
+    public function getClasses()
+    {
+        return response()->json(ClassGroup::all());
     }
 
     // GET /api/students/{id}
