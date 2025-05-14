@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Teacher;
+use App\Models\ClassGroup;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TeacherController extends Controller
 {
@@ -43,5 +45,26 @@ class TeacherController extends Controller
     {
         Teacher::destroy($userID);
         return response()->json(null, 204);
+    }
+    //
+     public function getTeacherClasses(Request $request)
+    {
+        $user = Auth::user(); // Lấy thông tin user từ token
+
+        if ($user->role !== 'TEACHER') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $teacher = Teacher::where('userID', $user->userID)->first();
+
+        if (!$teacher) {
+            return response()->json(['message' => 'Teacher not found'], 404);
+        }
+
+        $classes = ClassGroup::where('teacherID', $teacher->userID)->get();
+
+        return response()->json([
+            'classes' => $classes
+        ]);
     }
 }
