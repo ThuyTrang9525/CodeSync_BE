@@ -52,6 +52,10 @@ protected $keyType = 'int';
 
     public function student()
     {
-        return $this->hasOne(Student::class, 'user_id', 'id');
+        return $this->hasOne(Student::class, 'usesID', 'id');
     }
+    public function classGroups() {
+    return $this->hasMany(ClassGroup::class, 'userID');
+}
+
 }
