@@ -165,22 +165,22 @@ class StudentController extends Controller
     /**
      * Store a newly created goal.
      */
-   public function storeGoal(Request $request)
+public function storeGoal(Request $request)
 {
-    $user = Auth::user();
-
+    $user = Auth::user();  // Get the authenticated user
     if ($user->role !== 'STUDENT') {
         return response()->json(['message' => 'Only students can create goals'], 403);
     }
 
+    // Gán validate vào biến $validated
     $validated = $request->validate([
-        'userID' => $user->userID,
-        'title' => 'required|string|max:255',
+        'title' => 'required|string',
         'description' => 'required|string',
-        'semester' => 'required|string|max:50',
+        'semester' => 'required|string',
         'deadline' => 'required|date',
-        'status' => 'nullable|string|in:not-started,in-progress,completed',
     ]);
+
+    $status = $request->has('status') ? $request->status : 'not-started';
 
     $goal = Goal::create([
         'title' => $validated['title'],
@@ -188,11 +188,12 @@ class StudentController extends Controller
         'description' => $validated['description'],
         'semester' => $validated['semester'],
         'deadline' => $validated['deadline'],
-        'status' => $validated['status'] ?? 'not-started',
+        'status' => $status,
     ]);
+    return new GoalResource($goal);
+}
 
-        return new GoalResource($goal);
-    }
+
 
     /**
      * Display the specified goal.
