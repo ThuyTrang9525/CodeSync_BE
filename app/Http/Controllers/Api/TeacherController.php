@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Teacher;
+use App\Models\Student;
 use App\Models\ClassGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -49,7 +51,7 @@ class TeacherController extends Controller
     //
      public function getTeacherClasses(Request $request)
     {
-        $user = Auth::user(); // Lấy thông tin user từ token
+        $user = Auth::user(); 
 
         if ($user->role !== 'TEACHER') {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -61,10 +63,29 @@ class TeacherController extends Controller
             return response()->json(['message' => 'Teacher not found'], 404);
         }
 
-        $classes = ClassGroup::where('teacherID', $teacher->userID)->get();
+        $classes = ClassGroup::where('userID', $teacher->userID)->get();
 
         return response()->json([
             'classes' => $classes
         ]);
     }
+    //
+    public function getStudentsByClass($classID)
+    {
+        $class = ClassGroup::with(['students.user'])->find($classID);
+
+        if (!$class) {
+            return response()->json(['message' => 'Class not found'], 404);
+        }
+
+        $students = $class->students->map(function ($student) {
+            return $student->user ?? null;
+        })->filter()->values();
+
+        return response()->json([
+            // 'classID' => $class->classID,
+            'students' => $students
+        ]);
+    }
+
 }

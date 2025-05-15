@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
 });
 Route::middleware('auth:sanctum')->get('/teacher/classes', [TeacherController::class, 'getTeacherClasses']);
+Route::get('/classes/{classId}/students', [TeacherController::class, 'getStudentsByClass']);
 
 Route::prefix('admin')->group(function () {
     Route::get('users', [AdminController::class, 'indexUsers']);

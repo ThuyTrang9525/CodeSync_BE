@@ -14,7 +14,7 @@ class Teacher extends Model
     }
     public function classGroups()
 {
-    return $this->hasMany(ClassGroup::class, 'teacherID');
+    return $this->hasMany(ClassGroup::class, 'userID');
 }
 
 }

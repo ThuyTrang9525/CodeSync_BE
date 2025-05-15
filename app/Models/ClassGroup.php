@@ -11,6 +11,8 @@ class ClassGroup extends Model
             return $this->belongsTo(Teacher::class, 'userID');
         }
     protected $table = 'class_groups'; 
+    protected $primaryKey = 'classID';
+
 
     public function students()
         {
