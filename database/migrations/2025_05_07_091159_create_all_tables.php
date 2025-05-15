@@ -92,6 +92,7 @@ return new class extends Migration {
         Schema::create('goals', function (Blueprint $table) {
             $table->id('goalID');
             $table->unsignedBigInteger('userID');
+            $table->string('title');
             $table->text('description');
             $table->string('semester');
             $table->date('deadline');

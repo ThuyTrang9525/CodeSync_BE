@@ -138,6 +138,7 @@ return array(
     'Cron\\MinutesField' => $vendorDir . '/dragonmantank/cron-expression/src/Cron/MinutesField.php',
     'Cron\\MonthField' => $vendorDir . '/dragonmantank/cron-expression/src/Cron/MonthField.php',
     'Database\\Factories\\UserFactory' => $baseDir . '/database/factories/UserFactory.php',
+    'Database\\Seeders\\ClassGroupStudentSeeder' => $baseDir . '/database/seeders/ClassGroupStudentSeeder.php',
     'Database\\Seeders\\ClassesTableSeeder' => $baseDir . '/database/seeders/ClassesTableSeeder.php',
     'Database\\Seeders\\DatabaseSeeder' => $baseDir . '/database/seeders/DatabaseSeeder.php',
     'Database\\Seeders\\GoalSeeder' => $baseDir . '/database/seeders/GoalSeeder.php',
