@@ -113,7 +113,7 @@ public function login(Request $request)
     } elseif ($user->role === 'TEACHER') {
         $extraData = Teacher::where('userID', $user->userID)->first();
         if ($extraData) {
-            $classes = ClassGroup::where('teacherID', $extraData->userID)->get();
+            $classes = ClassGroup::where('userID', $extraData->userID)->get();
         }
     }
 

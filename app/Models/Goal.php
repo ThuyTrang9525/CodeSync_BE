@@ -34,4 +34,8 @@ class Goal extends Model
     {
         return $this->belongsTo(Student::class, 'userID', 'userID');
     }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'userID', 'userID');
+    }
 }

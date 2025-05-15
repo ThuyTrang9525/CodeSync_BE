@@ -24,8 +24,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/goals/{goal}', [StudentController::class, 'showGoal']);
     Route::put('/goals/{goal}', [StudentController::class, 'updateGoal']);
     Route::delete('/goals/{goal}', [StudentController::class, 'destroyGoal']);
+    // Get all class groups for student
+    Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
 });
 Route::middleware('auth:sanctum')->get('/teacher/classes', [TeacherController::class, 'getTeacherClasses']);
+Route::get('/classes/{classId}/students', [TeacherController::class, 'getStudentsByClass']);
 
 Route::prefix('admin')->group(function () {
     Route::get('users', [AdminController::class, 'indexUsers']);
@@ -41,6 +44,13 @@ Route::prefix('admin')->group(function () {
     Route::delete('classes/{id}', [AdminController::class, 'destroyClass']);
 
     Route::get('stats', [AdminController::class, 'getStats']);
+    Route::get('goals', [AdminController::class, 'getGoals']);
+
+    Route::patch('/notifications/{id}/mark-read', [AdminController::class, 'markRead']);
+    Route::delete('/notifications/{id}', [AdminController::class, 'destroy']);
+    Route::post('/notifications/{id}/read', [AdminController::class, 'markAsRead']);
+    
+    Route::get('notifications', [AdminController::class, 'getNotifications']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
