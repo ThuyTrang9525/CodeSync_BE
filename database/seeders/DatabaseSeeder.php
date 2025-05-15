@@ -17,7 +17,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UsersTableSeeder::class,
             StudentsTableSeeder::class,
-            GoalsTableSeeder::class,
+            ClassesTableSeeder::class,
+            GoalSeeder::class,
             // Thêm các Seeder khác nếu cần
         ]);
     }

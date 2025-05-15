@@ -63,34 +63,29 @@ class TeacherController extends Controller
             return response()->json(['message' => 'Teacher not found'], 404);
         }
 
-        $classes = ClassGroup::where('teacherID', $teacher->userID)->get();
+        $classes = ClassGroup::where('userID', $teacher->userID)->get();
 
         return response()->json([
             'classes' => $classes
         ]);
     }
     //
-    public function getStudentsByClass($classId)
+    public function getStudentsByClass($classID)
     {
-        $class = ClassGroup::find($classId);
+        $class = ClassGroup::with(['students.user'])->find($classID);
 
         if (!$class) {
             return response()->json(['message' => 'Class not found'], 404);
         }
 
-        $students = DB::table('class_group_student')
-            ->join('students', 'class_group_student.studentID', '=', 'students.studentID')
-            ->join('users', 'students.userID', '=', 'users.userID')
-            ->where('class_group_student.classID', $classId)
-            ->select(
-                'students.studentID as id',
-                'users.name',
-                'users.email'
-            )
-            ->get();
+        $students = $class->students->map(function ($student) {
+            return $student->user ?? null;
+        })->filter()->values();
 
-        return response()->json($students);
+        return response()->json([
+            // 'classID' => $class->classID,
+            'students' => $students
+        ]);
     }
-
 
 }

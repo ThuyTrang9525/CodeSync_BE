@@ -10,11 +10,12 @@ class UsersTableSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('users')->insert([
+        // Danh sách người dùng mẫu
+        $users = [
             [
                 'name' => 'Nguyễn Văn A',
                 'email' => 'a@example.com',
-                'password' => Hash::make('password1'),
+                'password' =>Hash::make('123123'),
                 'role' => 'STUDENT',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -22,7 +23,7 @@ class UsersTableSeeder extends Seeder
             [
                 'name' => 'Trần Thị B',
                 'email' => 'b@example.com',
-                'password' => Hash::make('password2'),
+                'password' => Hash::make('123123'),
                 'role' => 'STUDENT',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -30,11 +31,38 @@ class UsersTableSeeder extends Seeder
             [
                 'name' => 'Lê Văn C',
                 'email' => 'c@example.com',
-                'password' => Hash::make('password3'),
+                'password' =>Hash::make('123123'),
                 'role' => 'TEACHER',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        ]);
+            [
+                'name' => 'Lê Văn D',
+                'email' => 'd@example.com',
+                'password' =>Hash::make('123123'),
+                'role' => 'TEACHER',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Lê Văn E',
+                'email' => 'e@example.com',
+                'password' =>Hash::make('123123'),
+                'role' => 'TEACHER',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Admin Hệ thống',
+                'email' => 'admin@example.com',
+                'password' =>Hash::make('123123'),
+                'role' => 'ADMIN',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ];
+
+        // Chèn vào bảng users
+        DB::table('users')->insert($users);
     }
 }

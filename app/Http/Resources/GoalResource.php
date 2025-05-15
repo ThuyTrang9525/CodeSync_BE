@@ -16,6 +16,7 @@ class GoalResource extends JsonResource
     {
         return [
             'goalID' => $this->goalID,
+            'title' => $this->title,
             'description' => $this->description,
             'semester' => $this->semester,
             'deadline' => $this->deadline->format('Y-m-d'),

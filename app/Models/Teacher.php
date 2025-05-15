@@ -10,11 +10,11 @@ class Teacher extends Model
     
     public function user()
     {
-        return $this->belongsTo(User::class, 'id');
+        return $this->belongsTo(User::class, 'userID');
     }
     public function classGroups()
 {
-    return $this->hasMany(ClassGroup::class, 'teacherID');
+    return $this->hasMany(ClassGroup::class, 'userID');
 }
 
 }
