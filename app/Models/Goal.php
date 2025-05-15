@@ -16,7 +16,7 @@ class Goal extends Model
     protected $fillable = [
         'title',
         'goalID',
-        'studentID',
+        'userID',
         'description',
         'semester',
         'deadline',
@@ -30,6 +30,24 @@ class Goal extends Model
 
     public function student()
     {
-        return $this->belongsTo(Student::class, 'studentID', 'userID');
+        return $this->belongsTo(Student::class, 'userID', 'userID');
+    }
+}
+
+class ClassGroup extends Model
+{
+    protected $table = 'class_groups';
+    protected $primaryKey = 'classID';
+
+    // Quan hệ với giáo viên (dùng userID)
+    public function teacher()
+    {
+        return $this->belongsTo(User::class, 'userID', 'userID');
+    }
+
+    // Quan hệ với sinh viên (dùng userID)
+    public function students()
+    {
+        return $this->belongsToMany(Student::class, 'class_group_student', 'classID', 'userID');
     }
 }

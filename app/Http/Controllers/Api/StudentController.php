@@ -99,7 +99,7 @@ class StudentController extends Controller
         }
 
         // Query goals for the student
-        $query = Goal::where('studentID', $student->userID);
+        $query = Goal::where('userId', $student->userID);
 
         // Optional semester filter
         if ($request->has('semester')) {
@@ -131,7 +131,7 @@ class StudentController extends Controller
         }
 
         // Get distinct semesters for the student
-        $semesters = Goal::where('studentID', $user->userID)
+        $semesters = Goal::where('userID', $user->userID)
             ->select('semester')
             ->distinct()
             ->orderBy('semester')
@@ -154,7 +154,7 @@ class StudentController extends Controller
         }
 
         // Get goals for the specified semester
-        $goals = Goal::where('studentID', $user->userID)
+        $goals = Goal::where('userID', $user->userID)
             ->where('semester', $semester)
             ->get();
 
@@ -185,7 +185,7 @@ class StudentController extends Controller
 
         $goal = Goal::create([
             'title' => $request->input('title'), // Assuming title is also provided
-            'studentID' => $user->userID,
+            'userID' => $user->userID,
             'description' => $validated['description'],
             'semester' => $validated['semester'],
             'deadline' => $validated['deadline'],
@@ -203,7 +203,7 @@ class StudentController extends Controller
         $user = Auth::user();
 
         // Check if the goal belongs to the authenticated student
-        if ($user->role !== 'STUDENT' || $goal->studentID !== $user->userID) {
+        if ($user->role !== 'STUDENT' || $goal->userID !== $user->userID) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -219,7 +219,7 @@ class StudentController extends Controller
         $user = Auth::user();
 
         // Check if the goal belongs to the authenticated student
-        if ($user->role !== 'STUDENT' || $goal->studentID !== $user->userID) {
+        if ($user->role !== 'STUDENT' || $goal->userID !== $user->userID) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -244,7 +244,7 @@ class StudentController extends Controller
         $user = Auth::user();
 
         // Check if the goal belongs to the authenticated student
-        if ($user->role !== 'STUDENT' || $goal->studentID !== $user->userID) {
+        if ($user->role !== 'STUDENT' || $goal->userID !== $user->userID) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -254,7 +254,7 @@ class StudentController extends Controller
     }
 
     // API: Lấy danh sách lớp học của sinh viên
-    public function getClasses()
+    public function getStudentClasses()
     {
         $user = Auth::user();
 
@@ -265,7 +265,7 @@ class StudentController extends Controller
             ], 403);
         }
 
-        // Tìm sinh viên dựa trên userID
+        // Lấy thông tin sinh viên dựa trên userID
         $student = Student::where('userID', $user->userID)->first();
 
         if (!$student) {
@@ -275,10 +275,10 @@ class StudentController extends Controller
         }
 
         // Lấy danh sách lớp học có kèm thông tin giáo viên
-        $classes = $student->classGroups()->with('teacher.user')->get();
+        $classes = $student->classGroups()->with(['teacher'])->get();
 
         return response()->json([
-            'student' => $user->name ?? $user->email, // tuỳ bạn muốn hiện thông tin nào
+            'student' => $user->name ?? $user->email,
             'classes' => $classes
         ]);
     }

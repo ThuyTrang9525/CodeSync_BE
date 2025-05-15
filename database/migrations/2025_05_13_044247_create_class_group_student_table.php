@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('class_group_student', function (Blueprint $table) {
             $table->unsignedBigInteger('classID');
-            $table->unsignedBigInteger('studentID'); // Thay vì studentID
-            $table->primary(['classID', 'studentID']);
+            $table->unsignedBigInteger('userID'); // Thay vì userID
+            $table->primary(['classID', 'userID']);
 
             $table->foreign('classID')->references('classID')->on('class_groups')->onDelete('cascade');
             $table->foreign('studentID')->references('studentID')->on('students')->onDelete('cascade');

@@ -8,13 +8,15 @@ class ClassGroup extends Model
     protected $table = 'class_groups';
     protected $primaryKey = 'classID';
 
- public function teacher()
-{
-    return $this->belongsTo(Teacher::class, 'teacherID');
-}
+    // Quan hệ với giáo viên (dùng userID)
+    public function teacher()
+    {
+        return $this->belongsTo(User::class, 'userID', 'userID');
+    }
 
+    // Quan hệ với sinh viên (dùng userID)
     public function students()
     {
-        return $this->belongsToMany(Student::class, 'class_group_student', 'classID', 'studentID');
+        return $this->belongsToMany(Student::class, 'class_group_student', 'classID', 'userID');
     }
 }
