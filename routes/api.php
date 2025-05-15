@@ -24,6 +24,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/goals/{goal}', [StudentController::class, 'showGoal']);
     Route::put('/goals/{goal}', [StudentController::class, 'updateGoal']);
     Route::delete('/goals/{goal}', [StudentController::class, 'destroyGoal']);
+    // Get all class groups for student
+    Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
 });
 Route::middleware('auth:sanctum')->get('/teacher/classes', [TeacherController::class, 'getTeacherClasses']);
 
@@ -48,4 +50,20 @@ Route::prefix('admin')->group(function () {
     Route::post('/notifications/{id}/read', [AdminController::class, 'markAsRead']);
     
     Route::get('notifications', [AdminController::class, 'getNotifications']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/student/study-plans/semester/{semester}', [StudentController::class, 'getStudyPlansBySemester']);
+    Route::post('/student/study-plans', [StudentController::class, 'createStudyPlan']);
+    Route::put('/student/study-plans/{id}', [StudentController::class, 'updateStudyPlan']);
+    Route::delete('/student/study-plans/{id}', [StudentController::class, 'deleteStudyPlan']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    // In-class Study Plan APIs
+    Route::get('/student/inclass-plans/semester/{semester}', [StudentController::class, 'getInClassPlansBySemester']);
+    Route::get('/student/inclass-plans/{id}', [StudentController::class, 'getInClassPlan']);
+    Route::post('/student/inclass-plans', [StudentController::class, 'createInClassPlan']);
+    Route::put('/student/inclass-plans/{id}', [StudentController::class, 'updateInClassPlan']);
+    Route::delete('/student/inclass-plans/{id}', [StudentController::class, 'deleteInClassPlan']);
 });

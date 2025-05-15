@@ -1,11 +1,11 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class ClassGroup extends Model
 {
+
     public function teacher()
         {
             return $this->belongsTo(Teacher::class, 'userID');

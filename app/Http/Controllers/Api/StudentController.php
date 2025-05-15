@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Log;
 use App\Models\Student;
 use App\Models\ClassGroup;
 use Illuminate\Http\Request;
 use App\Models\Goal;
 use App\Models\StudyPlan;
+use App\Models\InClassStudyPlan;
 use App\Http\Resources\GoalResource;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,7 +31,7 @@ class StudentController extends Controller
     public function show($id)
     {
         $s = Student::find($id);
-        if (!$s) return response()->json(['message'=>'Not found'],404);
+        if (!$s) return response()->json(['message' => 'Not found'], 404);
         return response()->json($s);
     }
 
@@ -55,7 +57,7 @@ class StudentController extends Controller
     public function update(Request $req, $id)
     {
         $s = Student::find($id);
-        if (!$s) return response()->json(['message'=>'Not found'],404);
+        if (!$s) return response()->json(['message' => 'Not found'], 404);
 
         $data = $req->validate([
             'userID'         => 'sometimes|exists:users,id',
@@ -76,47 +78,47 @@ class StudentController extends Controller
     public function destroy($id)
     {
         $s = Student::find($id);
-        if (!$s) return response()->json(['message'=>'Not found'],404);
+        if (!$s) return response()->json(['message' => 'Not found'], 404);
         $s->delete();
-        return response()->json(['message'=>'Deleted']);
+        return response()->json(['message' => 'Deleted']);
     }
 
 
     public function getGoals(Request $request)
-{
-    // Get the authenticated user
-    $user = Auth::user();
-    
-    // Check if the user is a student
-    if ($user->role !== 'STUDENT') {
-        return response()->json(['message' => 'Only students can access goals'], 403);
-    }
-    
-    // Get the student record
-    $student = Student::where('userID', $user->userID)->first();
-    
-    if (!$student) {
-        return response()->json(['message' => 'Student record not found'], 404);
-    }
+    {
+        // Get the authenticated user
+        $user = Auth::user();
+
+        // Check if the user is a student
+        if ($user->role !== 'STUDENT') {
+            return response()->json(['message' => 'Only students can access goals'], 403);
+        }
+
+        // Get the student record
+        $student = Student::where('userID', $user->userID)->first();
+
+        if (!$student) {
+            return response()->json(['message' => 'Student record not found'], 404);
+        }
 
     // Query goals for the student
     $query = Goal::where('userID', $student->userID);
 
-    // Optional semester filter
-    if ($request->has('semester')) {
-        $query->where('semester', $request->semester);
+        // Optional semester filter
+        if ($request->has('semester')) {
+            $query->where('semester', $request->semester);
+        }
+
+        // Optional status filter
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Get the goals
+        $goals = $query->get();
+
+        return GoalResource::collection($goals);
     }
-
-    // Optional status filter
-    if ($request->has('status')) {
-        $query->where('status', $request->status);
-    }
-
-    // Get the goals
-    $goals = $query->get();
-
-    return GoalResource::collection($goals);
-}
 
     /**
      * Display a list of all semesters with goals.
@@ -125,19 +127,19 @@ class StudentController extends Controller
     {
         // Get the authenticated user
         $user = Auth::user();
-        
+
         // Check if the user is a student
         if ($user->role !== 'STUDENT') {
             return response()->json(['message' => 'Only students can access goals'], 403);
         }
-        
+
         // Get distinct semesters for the student
         $semesters = Goal::where('userID', $user->userID)
             ->select('semester')
             ->distinct()
             ->orderBy('semester')
             ->pluck('semester');
-        
+
         return response()->json(['semesters' => $semesters]);
     }
 
@@ -148,17 +150,17 @@ class StudentController extends Controller
     {
         // Get the authenticated user
         $user = Auth::user();
-        
+
         // Check if the user is a student
         if ($user->role !== 'STUDENT') {
             return response()->json(['message' => 'Only students can access goals'], 403);
         }
-        
+
         // Get goals for the specified semester
         $goals = Goal::where('userID', $user->userID)
             ->where('semester', $semester)
             ->get();
-        
+
         return GoalResource::collection($goals);
     }
 
@@ -202,7 +204,7 @@ public function storeGoal(Request $request)
     {
         // Get the authenticated user
         $user = Auth::user();
-        
+
         // Check if the goal belongs to the authenticated student
         if ($user->role !== 'STUDENT' || $goal->userID !== $user->userID) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -218,7 +220,7 @@ public function storeGoal(Request $request)
     {
         // Get the authenticated user
         $user = Auth::user();
-        
+
         // Check if the goal belongs to the authenticated student
         if ($user->role !== 'STUDENT' || $goal->userID !== $user->userID) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -243,7 +245,7 @@ public function storeGoal(Request $request)
     {
         // Get the authenticated user
         $user = Auth::user();
-        
+
         // Check if the goal belongs to the authenticated student
         if ($user->role !== 'STUDENT' || $goal->userID !== $user->userID) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -253,4 +255,139 @@ public function storeGoal(Request $request)
 
         return response()->json(['message' => 'Goal deleted successfully']);
     }
+
+
+
+    public function getStudyPlansBySemester($semester)
+{
+    $userId = Auth::id();
+
+    return response()->json(
+        StudyPlan::where('userID', $userId)
+            ->where('semester', $semester)
+            ->orderBy('date', 'desc')
+            ->get()
+    );
+}
+
+
+public function getInClassPlansBySemester($semester)
+{
+    $userId = Auth::id();
+
+    return response()->json(
+        InClassStudyPlan::where('userID', $userId)
+            ->where('semester', $semester)
+            ->orderBy('date', 'desc')
+            ->get()
+    );
+}
+
+public function createInClassPlan(Request $request)
+{
+    $data = $request->validate([
+        'semester' => 'required|string',
+        'date' => 'required|date',
+        'skill' => 'required|string',
+        'lessonSummary' => 'nullable|string',
+        'selfAssessment' => 'nullable|integer',
+        'difficulties' => 'nullable|string',
+        'planToImprove' => 'nullable|string',
+        'problemSolved' => 'nullable|boolean',
+    ]);
+
+    $data['userID'] = Auth::id();
+
+    return response()->json(InClassStudyPlan::create($data), 201);
+}
+
+
+    // Tạo mới study plan
+public function createStudyPlan(Request $request)
+{
+    try {
+        $validated = $request->validate([
+            'type' => 'required|in:SELF_STUDY,IN_CLASS',
+            'semester' => 'required|string',
+            'date' => 'required|date',
+            'skills' => 'required|string',
+            'lessonSummary' => 'nullable|string',
+            'selfAssessment' => 'nullable|integer',
+            'difficulties' => 'nullable|string',
+            'planToImprove' => 'nullable|string',
+            'problemSolved' => 'nullable|boolean',
+            'concentration' => 'nullable|integer',
+            'resources' => 'nullable|string',
+            'activities' => 'nullable|string',
+            'evaluation' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ]);
+
+        $validated['userID'] = Auth::id();
+
+        $plan = StudyPlan::create($validated);
+
+        if (!$plan) {
+            return response()->json(['message' => 'Không thể lưu kế hoạch học tập'], 500);
+        }
+
+        return response()->json(['message' => 'Tạo thành công', 'data' => $plan], 201);
+    } catch (\Exception $e) {
+        // Ghi log nếu muốn
+        Log::error('Lỗi khi tạo study plan: ' . $e->getMessage());
+
+        // Trả lại lỗi cụ thể cho Postman
+        return response()->json([
+            'message' => 'Đã xảy ra lỗi',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+    // Cập nhật study plan
+    public function updateStudyPlan(Request $request, $id)
+    {
+        $plan = StudyPlan::findOrFail($id);
+
+        if ($plan->userID !== Auth::id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'type' => 'in:SELF_STUDY,IN_CLASS',
+            'semester' => 'string',
+            'date' => 'date',
+            'skill' => 'string',
+            'lessonSummary' => 'nullable|string',
+            'selfAssessment' => 'nullable|integer',
+            'difficulties' => 'nullable|string',
+            'planToImprove' => 'nullable|string',
+            'problemSolved' => 'nullable|boolean',
+            'concentration' => 'nullable|integer',
+            'resources' => 'nullable|string',
+            'activities' => 'nullable|string',
+            'evaluation' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ]);
+
+        $plan->update($validated);
+
+        return response()->json($plan);
+    }
+
+    // Xóa study plan
+    public function deleteStudyPlan($id)
+    {
+        $plan = StudyPlan::findOrFail($id);
+
+        if ($plan->userID !== Auth::id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $plan->delete();
+
+        return response()->json(['message' => 'Study plan deleted']);
+    }
+
 }
