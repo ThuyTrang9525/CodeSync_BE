@@ -8,6 +8,8 @@ use App\Models\Student;
 use App\Models\ClassGroup;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Models\Goal;
+use App\Models\Notification;
 
 class AdminController extends Controller
 {
@@ -23,6 +25,42 @@ class AdminController extends Controller
             'students' => $students,
             'classes' => $classes,
         ]);
+    }
+
+    public function getGoals(){
+        $goals = Goal::with('user')->get();
+        return response()->json($goals);
+    }
+
+    public function getNotifications()
+    {
+        $notifications = Notification::with('user')->get();
+        return response()->json($notifications);
+    }
+
+    public function markRead($id) {
+        $noti = Notification::findOrFail($id);
+        $noti->isRead = 1;
+        $noti->save();
+        return response()->json(['message' => 'Đã đánh dấu đã đọc']);
+    }
+
+    public function markAsRead(Request $request, $id)
+    {
+        $notification = Notification::find($id);
+        if (!$notification) {
+            return response()->json(['message' => 'Notification not found'], 404);
+        }
+
+        $notification->isRead = $request->input('isRead', 1);
+        $notification->save();
+
+        return response()->json(['message' => 'Marked as read']);
+    }
+
+    public function destroy($id) {
+        Notification::destroy($id);
+        return response()->json(['message' => 'Đã xóa']);
     }
 
     //////////////////////////////////////////////////////////////////////// User

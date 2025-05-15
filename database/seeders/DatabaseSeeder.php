@@ -19,7 +19,8 @@ class DatabaseSeeder extends Seeder
             StudentsTableSeeder::class,
             ClassesTableSeeder::class,
             GoalSeeder::class,
-            // Thêm các Seeder khác nếu cần
+            ClassGroupStudentSeeder::class,
+            NotifyTableSeeder::class,
         ]);
     }
 }
