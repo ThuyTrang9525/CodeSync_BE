@@ -24,6 +24,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/goals/{goal}', [StudentController::class, 'showGoal']);
     Route::put('/goals/{goal}', [StudentController::class, 'updateGoal']);
     Route::delete('/goals/{goal}', [StudentController::class, 'destroyGoal']);
+    // Get all class groups for student
+    Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
 });
 Route::middleware('auth:sanctum')->get('/teacher/classes', [TeacherController::class, 'getTeacherClasses']);
 
