@@ -54,12 +54,19 @@ protected $keyType = 'int';
     {
         return $this->hasOne(Student::class, 'usesID', 'id');
     }
+
     public function classGroups() {
-    return $this->hasMany(ClassGroup::class, 'userID');
-}
-public function goal()
+        return $this->hasMany(ClassGroup::class, 'userID');
+    }
+
+    public function goal()
     {
-        return $this->hasOne(Goal::class, 'usesID');
+        return $this->hasMany(Goal::class, 'usesID');
+    }
+
+    public function notify()
+    {
+        return $this->hasMany(Notification::class, 'usesID');
     }
 
 }

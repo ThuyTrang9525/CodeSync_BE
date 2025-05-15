@@ -42,4 +42,10 @@ Route::prefix('admin')->group(function () {
 
     Route::get('stats', [AdminController::class, 'getStats']);
     Route::get('goals', [AdminController::class, 'getGoals']);
+
+    Route::patch('/notifications/{id}/mark-read', [AdminController::class, 'markRead']);
+    Route::delete('/notifications/{id}', [AdminController::class, 'destroy']);
+    Route::post('/notifications/{id}/read', [AdminController::class, 'markAsRead']);
+    
+    Route::get('notifications', [AdminController::class, 'getNotifications']);
 });
