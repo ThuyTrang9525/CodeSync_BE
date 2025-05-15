@@ -180,6 +180,8 @@ public function storeGoal(Request $request)
         'description' => 'required|string',
         'semester' => 'required|string',
         'deadline' => 'required|date',
+        'subject' => 'sometimes|string',
+        'week' => 'sometimes|integer',
     ]);
 
     $status = $request->has('status') ? $request->status : 'not-started';
@@ -191,6 +193,8 @@ public function storeGoal(Request $request)
         'semester' => $validated['semester'],
         'deadline' => $validated['deadline'],
         'status' => $status,
+        'subject' => $validated['subject'] ?? null,
+        'week' => $validated['week'] ?? null,
     ]);
     return new GoalResource($goal);
 }
@@ -231,6 +235,8 @@ public function storeGoal(Request $request)
             'semester' => 'sometimes|required|string',
             'deadline' => 'sometimes|required|date',
             'status' => 'sometimes|required|string',
+            'subject' => 'sometimes|string',
+            'week' => 'sometimes|integer',
         ]);
 
         $goal->update($validated);

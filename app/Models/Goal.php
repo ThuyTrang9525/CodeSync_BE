@@ -21,6 +21,8 @@ class Goal extends Model
         'semester',
         'deadline',
         'status',
+        'subject',
+        'week',
 
     ];
 
