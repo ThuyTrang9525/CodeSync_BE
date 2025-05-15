@@ -22,7 +22,7 @@ class Student extends Model
     // Quan hệ ngược lên User (nếu cần)
     public function user()
     {
-        return $this->belongsTo(User::class, 'id');
+        return $this->belongsTo(User::class, 'userID');
     }
     public function classGroups()
     {

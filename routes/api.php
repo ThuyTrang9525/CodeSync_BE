@@ -35,3 +35,4 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 // Teacher
 Route::middleware('auth:sanctum')->get('/teacher/classes', [TeacherController::class, 'getTeacherClasses']);
+Route::get('/classes/{classId}/students', [TeacherController::class, 'getStudentsByClass']);
