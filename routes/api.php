@@ -6,7 +6,8 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\TeacherController;
-use App\Models\Teacher;
+
+
 
 Route::apiResource('/users', UserController::class);
 Route::apiResource('/students', StudentController::class);
@@ -24,10 +25,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/goals/{goal}', [StudentController::class, 'showGoal']);
     Route::put('/goals/{goal}', [StudentController::class, 'updateGoal']);
     Route::delete('/goals/{goal}', [StudentController::class, 'destroyGoal']);
-    // Get all class groups for student
     Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
+    // Get all class groups for student
+    // Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
+    // Get all notifications for student
+    // Route::get('/notifications/{receiverID}', [StudentController::class, 'getNotificationsByUser']);
+    // Route::delete('/notifications/{notificationID}', [StudentController::class, 'deleteNotification']);
+    // Route::post('/notifications/{notificationID}/read', [StudentController::class, 'markAsRead']);
 });
-// Teacher
+
+ Route::delete('/student/notifications/{notificationID}', [StudentController::class, 'deleteNotification']);
+ Route::post('/student/notifications/{notificationID}/read', [StudentController::class, 'markAsRead']);
+ Route::get('/student/notifications/{receiverID}', [StudentController::class, 'getNotificationsByUser']);
+
 Route::middleware('auth:sanctum')->get('/teacher/classes', [TeacherController::class, 'getTeacherClasses']);
 Route::get('/classes/{classId}/students', [TeacherController::class, 'getStudentsByClass']);
 Route::get('/notifications/{receiverID}', [TeacherController::class, 'getNotificationsByUser']);
@@ -51,7 +61,7 @@ Route::prefix('admin')->group(function () {
     Route::patch('/notifications/{id}/mark-read', [AdminController::class, 'markRead']);
     Route::delete('/notifications/{id}', [AdminController::class, 'destroy']);
     Route::post('/notifications/{id}/read', [AdminController::class, 'markAsRead']);
-    
+
     Route::get('notifications', [AdminController::class, 'getNotifications']);
 });
 
@@ -64,7 +74,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     // In-class Study Plan APIs
-    Route::get('/student/inclass-plans/semester/{semester}', [StudentController::class, 'getInClassPlansBySemester']);
+    Route::get('/student/inclass-plans/s emester/{semester}', [StudentController::class, 'getInClassPlansBySemester']);
     Route::get('/student/inclass-plans/{id}', [StudentController::class, 'getInClassPlan']);
     Route::post('/student/inclass-plans', [StudentController::class, 'createInClassPlan']);
     Route::put('/student/inclass-plans/{id}', [StudentController::class, 'updateInClassPlan']);
