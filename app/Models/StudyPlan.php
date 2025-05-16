@@ -11,18 +11,14 @@ class StudyPlan extends Model
     'userID',
     'type',
     'semester',
+    'week',
     'date',
-    'skills',
+    'skill',
     'lessonSummary',
     'selfAssessment',
     'difficulties',
     'planToImprove',
     'problemSolved',
-    'concentration',
-    'resources',
-    'activities',
-    'evaluation',
-    'notes'
 ];
 
     public $timestamps = false;

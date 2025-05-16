@@ -9,7 +9,7 @@ use App\Models\ClassGroup;
 use Illuminate\Http\Request;
 use App\Models\Goal;
 use App\Models\StudyPlan;
-use App\Models\InClassStudyPlan;
+use App\Models\SelfStudyPlan;
 use App\Http\Resources\GoalResource;
 use Illuminate\Support\Facades\Auth;
 
@@ -277,34 +277,38 @@ public function storeGoal(Request $request)
 }
 
 
-public function getInClassPlansBySemester($semester)
+public function getSelfPlansBySemester($semester)
 {
     $userId = Auth::id();
 
     return response()->json(
-        InClassStudyPlan::where('userID', $userId)
+        SelfStudyPlan::where('userID', $userId)
             ->where('semester', $semester)
             ->orderBy('date', 'desc')
             ->get()
     );
 }
 
-public function createInClassPlan(Request $request)
+public function createSelfPlan(Request $request)
 {
     $data = $request->validate([
         'semester' => 'required|string',
         'date' => 'required|date',
+        'semester' => 'required|string',
+        'week' => 'required|integer',
         'skill' => 'required|string',
         'lessonSummary' => 'nullable|string',
-        'selfAssessment' => 'nullable|integer',
-        'difficulties' => 'nullable|string',
-        'planToImprove' => 'nullable|string',
-        'problemSolved' => 'nullable|boolean',
+        'time_allocation' => 'nullable|integer',
+        'concentration' => 'nullable|integer',
+        'resources' => 'nullable|string',
+        'activities' => 'nullable|string',
+        'evaluation' => 'nullable|string',
+        'notes' => 'nullable|string',
     ]);
 
     $data['userID'] = Auth::id();
 
-    return response()->json(InClassStudyPlan::create($data), 201);
+    return response()->json(SelfStudyPlan::create($data), 200);
 }
 
 
@@ -313,25 +317,22 @@ public function createStudyPlan(Request $request)
 {
     try {
         $validated = $request->validate([
-            'type' => 'required|in:SELF_STUDY,IN_CLASS',
+            'week' => 'required|integer',
             'semester' => 'required|string',
             'date' => 'required|date',
-            'skills' => 'required|string',
+            'skill' => 'required|string',
             'lessonSummary' => 'nullable|string',
-            'selfAssessment' => 'nullable|integer',
-            'difficulties' => 'nullable|string',
-            'planToImprove' => 'nullable|string',
-            'problemSolved' => 'nullable|boolean',
             'concentration' => 'nullable|integer',
             'resources' => 'nullable|string',
             'activities' => 'nullable|string',
             'evaluation' => 'nullable|string',
             'notes' => 'nullable|string',
+            'time_allocation' => 'nullable|integer',
         ]);
 
         $validated['userID'] = Auth::id();
 
-        $plan = StudyPlan::create($validated);
+        $plan = SelfStudyPlan::create($validated);
 
         if (!$plan) {
             return response()->json(['message' => 'Không thể lưu kế hoạch học tập'], 500);
@@ -349,12 +350,36 @@ public function createStudyPlan(Request $request)
         ], 500);
     }
 }
+public function getSelfPlansBySemesterAndWeek($semester, $week)
+{
+    $userId = Auth::id();
+
+    return response()->json(
+        SelfStudyPlan::where('userID', $userId)
+            ->where('semester', $semester)
+            ->where('week', $week)
+            ->orderBy('date', 'desc')
+            ->get()
+    );
+}
+public function getStudyPlansBySemesterAndWeek($semester, $week)
+{
+    $userId = Auth::id();
+
+    return response()->json(
+        SelfStudyPlan::where('userID', $userId)
+            ->where('semester', $semester)
+            ->where('week', $week)
+            ->orderBy('date', 'desc')
+            ->get()
+    );
+}
 
 
     // Cập nhật study plan
     public function updateStudyPlan(Request $request, $id)
     {
-        $plan = StudyPlan::findOrFail($id);
+        $plan = SelfStudyPlan::findOrFail($id);
 
         if ($plan->userID !== Auth::id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
@@ -366,15 +391,12 @@ public function createStudyPlan(Request $request)
             'date' => 'date',
             'skill' => 'string',
             'lessonSummary' => 'nullable|string',
-            'selfAssessment' => 'nullable|integer',
-            'difficulties' => 'nullable|string',
-            'planToImprove' => 'nullable|string',
-            'problemSolved' => 'nullable|boolean',
             'concentration' => 'nullable|integer',
             'resources' => 'nullable|string',
             'activities' => 'nullable|string',
             'evaluation' => 'nullable|string',
             'notes' => 'nullable|string',
+            'time_allocation' => 'nullable|integer',
         ]);
 
         $plan->update($validated);
@@ -385,7 +407,7 @@ public function createStudyPlan(Request $request)
     // Xóa study plan
     public function deleteStudyPlan($id)
     {
-        $plan = StudyPlan::findOrFail($id);
+        $plan = SelfStudyPlan::findOrFail($id);
 
         if ($plan->userID !== Auth::id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
@@ -395,5 +417,34 @@ public function createStudyPlan(Request $request)
 
         return response()->json(['message' => 'Study plan deleted']);
     }
+public function getStudentClasses()
+{
+    $user = Auth::user();
 
+    // Kiểm tra quyền truy cập
+    if (!$user || $user->role !== 'STUDENT') {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Unauthorized'
+        ], 403);
+    }
+
+    // Lấy thông tin sinh viên dựa trên userID
+    $student = Student::where('userID', $user->userID)->first();
+
+    if (!$student) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Student not found'
+        ], 404);
+    }
+
+    // Lấy danh sách lớp học có kèm thông tin giáo viên
+    $classes = $student->classGroups()->with(['teacher'])->get();
+
+    return response()->json([
+        'student' => $user->name ?? $user->email,
+        'classes' => $classes
+    ]);
+}
 }

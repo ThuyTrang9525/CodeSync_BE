@@ -92,6 +92,8 @@ return new class extends Migration {
         Schema::create('goals', function (Blueprint $table) {
             $table->id('goalID');
             $table->unsignedBigInteger('userID');
+            $table->string('subject')->nullable();
+            $table->integer('week')->nullable();
             $table->string('title');
             $table->text('description');
             $table->string('semester');
@@ -99,25 +101,42 @@ return new class extends Migration {
             $table->enum('status', ['not-started', 'in-progress', 'completed'])->default('not-started');
             $table->foreign('userID')->references('userID')->on('students')->onDelete('cascade');
         });
-
-        // 10. STUDY PLANS
-        Schema::create('study_plans', function (Blueprint $table) {
+            Schema::create('study_plans', function (Blueprint $table) {
             $table->id('planID');
             $table->unsignedBigInteger('userID');
             $table->enum('type', ['SELF_STUDY', 'IN_CLASS']);
             $table->date('date');
+            $table->string('semester');
+            $table->integer('week')->nullable();
             $table->string('skills');
             $table->text('lessonSummary')->nullable();
             $table->integer('selfAssessment')->nullable();
             $table->text('difficulties')->nullable();
             $table->text('planToImprove')->nullable();
             $table->boolean('problemSolved')->default(false);
-            $table->integer('concentration')->nullable();
-            $table->text('resources')->nullable();
-            $table->text('activities')->nullable();
-            $table->text('evaluation')->nullable();
             $table->text('notes')->nullable();
             $table->foreign('userID')->references('userID')->on('students')->onDelete('cascade');
+        });
+        // 10. STUDY PLANS
+        Schema::create('in_class_study_plan', function (Blueprint $table) {
+            
+            $table->unsignedBigInteger('userID'); // Chắc chắn rằng cột này đúng tên
+            $table->string('semester');
+            $table->integer('week')->nullable();
+            $table->date('date');
+            $table->string('skill');
+            $table->text('lessonSummary')->nullable();
+            $table->integer('selfAssessment')->nullable();
+            $table->text('difficulties')->nullable();
+            $table->text('planToImprove')->nullable();
+            $table->boolean('problemSolved')->nullable();
+            $table->integer('concentration')->nullable();
+            $table->string('resources')->nullable();
+            $table->string('activities')->nullable();
+            $table->string('evaluation')->nullable();
+            $table->string('notes')->nullable();
+            // Tham chiếu đúng vào cột userID trong bảng users
+            $table->foreign('userID')->references('userID')->on('users')->onDelete('cascade');
         });
 
         // 11. ACHIEVEMENTS
@@ -146,6 +165,7 @@ return new class extends Migration {
         // 13. NOTIFICATIONS
         Schema::create('notifications', function (Blueprint $table) {
             $table->id('notificationID');
+            // $table->('seenderID')->nullable();
             $table->unsignedBigInteger('receiverID');
             $table->text('content');
             $table->enum('type', ['SYSTEM', 'GROUP', 'INTERACTION']);
