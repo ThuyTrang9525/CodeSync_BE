@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Teacher;
 use App\Models\Student;
 use App\Models\ClassGroup;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -87,5 +88,36 @@ class TeacherController extends Controller
             'students' => $students
         ]);
     }
+    //
+    public function getNotificationsByUser($receiverID)
+{
+    try {
+        $notifications = DB::table('notifications')
+            ->where('notifications.receiverID', $receiverID) 
+            ->join('users', 'notifications.senderID', '=', 'users.userID') 
+            ->leftJoin('class_group_student', 'notifications.receiverID', '=', 'class_group_student.userID') // lấy thông tin lớp của người nhận
+            ->leftJoin('class_groups', 'notifications.classID', '=', 'class_groups.classID')
+            ->select(
+                'notifications.notificationID',
+                'notifications.content',
+                'notifications.createdAt',
+                'users.name as name', 
+                'class_groups.className' 
+            )
+            ->orderBy('notifications.createdAt', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $notifications
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to fetch notifications',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 
 }
