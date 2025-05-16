@@ -57,6 +57,7 @@ Route::prefix('admin')->group(function () {
 
     Route::get('stats', [AdminController::class, 'getStats']);
     Route::get('goals', [AdminController::class, 'getGoals']);
+    Route::middleware('auth:api')->post('logout', [AdminController::class, 'logout']);
 
     Route::patch('/notifications/{id}/mark-read', [AdminController::class, 'markRead']);
     Route::delete('/notifications/{id}', [AdminController::class, 'destroy']);
