@@ -4,20 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class InClassStudyPlan extends Model
+class SelfStudyPlan extends Model
 {
     protected $primaryKey = 'planID';
-    protected $table = 'in_class_study_plans';
+    protected $table = 'in_class_study_plan';
     protected $fillable = [
         'userID',
         'semester',
+        'week',
         'date',
         'skill',
         'lessonSummary',
-        'selfAssessment',
-        'difficulties',
-        'planToImprove',
-        'problemSolved',
+        'time_allocation',
+        'concentration',
+        'resources',
+        'activities',
+        'evaluation',
+        'notes'
     ];
 
     public $timestamps = false;

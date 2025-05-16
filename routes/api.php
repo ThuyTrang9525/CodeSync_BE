@@ -74,10 +74,17 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    // In-class Study Plan APIs
-    Route::get('/student/inclass-plans/s emester/{semester}', [StudentController::class, 'getInClassPlansBySemester']);
-    Route::get('/student/inclass-plans/{id}', [StudentController::class, 'getInClassPlan']);
-    Route::post('/student/inclass-plans', [StudentController::class, 'createInClassPlan']);
-    Route::put('/student/inclass-plans/{id}', [StudentController::class, 'updateInClassPlan']);
-    Route::delete('/student/inclass-plans/{id}', [StudentController::class, 'deleteInClassPlan']);
+    // Self Study Plan APIs
+    Route::get('/student/inclass-plans/semester/{semester}', [StudentController::class, 'getSelfPlansBySemester']);
+    Route::get('/student/inclass-plans/{id}', [StudentController::class, 'getSelfPlan']);
+    Route::post('/student/inclass-plans', [StudentController::class, 'createSelfPlan']);
+    Route::put('/student/inclass-plans/{id}', [StudentController::class, 'updateSelfPlan']);
+    Route::delete('/student/inclass-plans/{id}', [StudentController::class, 'deleteSelfPlan']);
+    // Study Plans by Semester & Week
+Route::get('/student/study-plans/semester/{semester}/week/{week}', [StudentController::class, 'getStudyPlansBySemesterAndWeek']);
+
+// In-Class Plans by Semester & Week
+Route::get('/student/inclass-plans/semester/{semester}/week/{week}', [StudentController::class, 'getSelfPlansBySemesterAndWeek']);
+Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
+
 });

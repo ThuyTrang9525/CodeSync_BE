@@ -10,7 +10,7 @@ use App\Models\ClassGroup;
 use Illuminate\Http\Request;
 use App\Models\Goal;
 use App\Models\StudyPlan;
-use App\Models\InClassStudyPlan;
+use App\Models\SelfStudyPlan;
 use App\Http\Resources\GoalResource;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,36 +23,36 @@ class StudentController extends Controller
         return response()->json(Student::all());
     }
 
-   public function getStudentClasses()
-{
-    $user = Auth::user();
+//    public function getStudentClasses()
+// {
+//     $user = Auth::user();
 
-    // Kiểm tra quyền truy cập
-    if (!$user || $user->role !== 'STUDENT') {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Unauthorized'
-        ], 403);
-    }
+//     // Kiểm tra quyền truy cập
+//     if (!$user || $user->role !== 'STUDENT') {
+//         return response()->json([
+//             'status' => 'error',
+//             'message' => 'Unauthorized'
+//         ], 403);
+//     }
 
-    // Lấy thông tin sinh viên dựa trên userID
-    $student = Student::where('userID', $user->userID)->first();
+//     // Lấy thông tin sinh viên dựa trên userID
+//     $student = Student::where('userID', $user->userID)->first();
 
-    if (!$student) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Student not found'
-        ], 404);
-    }
+//     if (!$student) {
+//         return response()->json([
+//             'status' => 'error',
+//             'message' => 'Student not found'
+//         ], 404);
+//     }
 
-    // Lấy danh sách lớp học có kèm thông tin giáo viên
-    $classes = $student->classGroups()->with(['teacher'])->get();
+//     // Lấy danh sách lớp học có kèm thông tin giáo viên
+//     $classes = $student->classGroups()->with(['teacher'])->get();
 
-    return response()->json([
-        'student' => $user->name ?? $user->email,
-        'classes' => $classes
-    ]);
-}
+//     return response()->json([
+//         'student' => $user->name ?? $user->email,
+//         'classes' => $classes
+//     ]);
+// }
 
 
     // GET /api/students/{id}
@@ -202,26 +202,30 @@ class StudentController extends Controller
             return response()->json(['message' => 'Only students can create goals'], 403);
         }
 
-        // Gán validate vào biến $validated
-        $validated = $request->validate([
-            'title' => 'required|string',
-            'description' => 'required|string',
-            'semester' => 'required|string',
-            'deadline' => 'required|date',
-        ]);
+    // Gán validate vào biến $validated
+    $validated = $request->validate([
+        'title' => 'required|string',
+        'description' => 'required|string',
+        'semester' => 'required|string',
+        'deadline' => 'required|date',
+        'subject' => 'sometimes|string',
+        'week' => 'sometimes|integer',
+    ]);
 
         $status = $request->has('status') ? $request->status : 'not-started';
 
-        $goal = Goal::create([
-            'title' => $validated['title'],
-            'userID' => $user->userID,
-            'description' => $validated['description'],
-            'semester' => $validated['semester'],
-            'deadline' => $validated['deadline'],
-            'status' => $status,
-        ]);
-        return new GoalResource($goal);
-    }
+    $goal = Goal::create([
+        'title' => $validated['title'],
+        'userID' => $user->userID,
+        'description' => $validated['description'],
+        'semester' => $validated['semester'],
+        'deadline' => $validated['deadline'],
+        'status' => $status,
+        'subject' => $validated['subject'] ?? null,
+        'week' => $validated['week'] ?? null,
+    ]);
+    return new GoalResource($goal);
+}
 
 
 
@@ -259,6 +263,8 @@ class StudentController extends Controller
             'semester' => 'sometimes|required|string',
             'deadline' => 'sometimes|required|date',
             'status' => 'sometimes|required|string',
+            'subject' => 'sometimes|string',
+            'week' => 'sometimes|integer',
         ]);
 
         $goal->update($validated);
@@ -299,61 +305,62 @@ class StudentController extends Controller
     }
 
 
-    public function getInClassPlansBySemester($semester)
-    {
-        $userId = Auth::id();
+public function getSelfPlansBySemester($semester)
+{
+    $userId = Auth::id();
 
-        return response()->json(
-            InClassStudyPlan::where('userID', $userId)
-                ->where('semester', $semester)
-                ->orderBy('date', 'desc')
-                ->get()
-        );
-    }
+    return response()->json(
+        SelfStudyPlan::where('userID', $userId)
+            ->where('semester', $semester)
+            ->orderBy('date', 'desc')
+            ->get()
+    );
+}
 
-    public function createInClassPlan(Request $request)
-    {
-        $data = $request->validate([
+public function createSelfPlan(Request $request)
+{
+    $data = $request->validate([
+        'semester' => 'required|string',
+        'date' => 'required|date',
+        'semester' => 'required|string',
+        'week' => 'required|integer',
+        'skill' => 'required|string',
+        'lessonSummary' => 'nullable|string',
+        'time_allocation' => 'nullable|integer',
+        'concentration' => 'nullable|integer',
+        'resources' => 'nullable|string',
+        'activities' => 'nullable|string',
+        'evaluation' => 'nullable|string',
+        'notes' => 'nullable|string',
+    ]);
+
+        $data['userID'] = Auth::id();
+
+    return response()->json(SelfStudyPlan::create($data), 200);
+}
+
+
+    // Tạo mới study plan
+public function createStudyPlan(Request $request)
+{
+    try {
+        $validated = $request->validate([
+            'week' => 'required|integer',
             'semester' => 'required|string',
             'date' => 'required|date',
             'skill' => 'required|string',
             'lessonSummary' => 'nullable|string',
-            'selfAssessment' => 'nullable|integer',
-            'difficulties' => 'nullable|string',
-            'planToImprove' => 'nullable|string',
-            'problemSolved' => 'nullable|boolean',
+            'concentration' => 'nullable|integer',
+            'resources' => 'nullable|string',
+            'activities' => 'nullable|string',
+            'evaluation' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'time_allocation' => 'nullable|integer',
         ]);
-
-        $data['userID'] = Auth::id();
-
-        return response()->json(InClassStudyPlan::create($data), 201);
-    }
-
-
-    // Tạo mới study plan
-    public function createStudyPlan(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'type' => 'required|in:SELF_STUDY,IN_CLASS',
-                'semester' => 'required|string',
-                'date' => 'required|date',
-                'skills' => 'required|string',
-                'lessonSummary' => 'nullable|string',
-                'selfAssessment' => 'nullable|integer',
-                'difficulties' => 'nullable|string',
-                'planToImprove' => 'nullable|string',
-                'problemSolved' => 'nullable|boolean',
-                'concentration' => 'nullable|integer',
-                'resources' => 'nullable|string',
-                'activities' => 'nullable|string',
-                'evaluation' => 'nullable|string',
-                'notes' => 'nullable|string',
-            ]);
 
             $validated['userID'] = Auth::id();
 
-            $plan = StudyPlan::create($validated);
+        $plan = SelfStudyPlan::create($validated);
 
             if (!$plan) {
                 return response()->json(['message' => 'Không thể lưu kế hoạch học tập'], 500);
@@ -364,19 +371,43 @@ class StudentController extends Controller
             // Ghi log nếu muốn
             Log::error('Lỗi khi tạo study plan: ' . $e->getMessage());
 
-            // Trả lại lỗi cụ thể cho Postman
-            return response()->json([
-                'message' => 'Đã xảy ra lỗi',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        // Trả lại lỗi cụ thể cho Postman
+        return response()->json([
+            'message' => 'Đã xảy ra lỗi',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+public function getSelfPlansBySemesterAndWeek($semester, $week)
+{
+    $userId = Auth::id();
+
+    return response()->json(
+        SelfStudyPlan::where('userID', $userId)
+            ->where('semester', $semester)
+            ->where('week', $week)
+            ->orderBy('date', 'desc')
+            ->get()
+    );
+}
+public function getStudyPlansBySemesterAndWeek($semester, $week)
+{
+    $userId = Auth::id();
+
+    return response()->json(
+        SelfStudyPlan::where('userID', $userId)
+            ->where('semester', $semester)
+            ->where('week', $week)
+            ->orderBy('date', 'desc')
+            ->get()
+    );
+}
 
 
     // Cập nhật study plan
     public function updateStudyPlan(Request $request, $id)
     {
-        $plan = StudyPlan::findOrFail($id);
+        $plan = SelfStudyPlan::findOrFail($id);
 
         if ($plan->userID !== Auth::id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
@@ -388,15 +419,12 @@ class StudentController extends Controller
             'date' => 'date',
             'skill' => 'string',
             'lessonSummary' => 'nullable|string',
-            'selfAssessment' => 'nullable|integer',
-            'difficulties' => 'nullable|string',
-            'planToImprove' => 'nullable|string',
-            'problemSolved' => 'nullable|boolean',
             'concentration' => 'nullable|integer',
             'resources' => 'nullable|string',
             'activities' => 'nullable|string',
             'evaluation' => 'nullable|string',
             'notes' => 'nullable|string',
+            'time_allocation' => 'nullable|integer',
         ]);
 
         $plan->update($validated);
@@ -407,7 +435,7 @@ class StudentController extends Controller
     // Xóa study plan
     public function deleteStudyPlan($id)
     {
-        $plan = StudyPlan::findOrFail($id);
+        $plan = SelfStudyPlan::findOrFail($id);
 
         if ($plan->userID !== Auth::id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
@@ -417,68 +445,34 @@ class StudentController extends Controller
 
         return response()->json(['message' => 'Study plan deleted']);
     }
+    public function getStudentClasses()
+    {
+        $user = Auth::user();
 
+        // Kiểm tra quyền truy cập
+        if (!$user || $user->role !== 'STUDENT') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ], 403);
+        }
 
-    // Lấy danh sách thông báo của người dùng
-  public function getNotificationsByUser($receiverID)
-{
-    try {
-        $notifications = DB::table('notifications')
-            ->where('notifications.receiverID', $receiverID)
-            ->leftJoin('users', 'notifications.senderID', '=', 'users.userID') 
-            ->leftJoin('class_groups', 'notifications.classID', '=', 'class_groups.classID')
-            ->select(
-                'notifications.notificationID',
-                'notifications.content',
-                'notifications.createdAt',
-                'notifications.isRead',
-                'class_groups.className',
-                'users.name as senderName'
-            )
-            ->groupBy(
-                'notifications.notificationID',
-                'notifications.content',
-                'notifications.createdAt',
-                'notifications.isRead',
-                'class_groups.className',
-                'users.name'
-            )
-            ->orderBy('notifications.createdAt', 'desc')
-            ->get();
+        // Lấy thông tin sinh viên dựa trên userID
+        $student = Student::where('userID', $user->userID)->first();
+
+        if (!$student) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Student not found'
+            ], 404);
+        }
+
+        // Lấy danh sách lớp học có kèm thông tin giáo viên
+        $classes = $student->classGroups()->with(['teacher'])->get();
 
         return response()->json([
-            'status' => 'success',
-            'data' => $notifications
+            'student' => $user->name ?? $user->email,
+            'classes' => $classes
         ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Failed to fetch notifications',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
-
-    //xóa thông báo và dánh dấu đã đọc
-    public function deleteNotification($notificationID)
-    {
-        try {
-            DB::table('notifications')->where('notificationID', $notificationID)->delete();
-            return response()->json(['status' => 'success']);
-        } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
-        }
     }
-
-    public function markAsRead($notificationID)
-    {
-        try {
-            DB::table('notifications')
-                ->where('notificationID', $notificationID)
-                ->update(['isRead' => 1]);
-            return response()->json(['status' => 'success']);
-        } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
-        }
-    }
-}

@@ -17,12 +17,16 @@ class GoalSeeder extends Seeder
                 'description' => 'Improve math skills',
                 'semester'    => 'Spring 2025',
                 'deadline'    => Carbon::now()->addMonths(3)->toDateString(),
+                'title'       => 'Math Improvement',
+                'status'      => 'in-progress',
             ],
             [
                 'userID'   => 2,
                 'description' => 'Complete science project',
                 'semester'    => 'Spring 2025',
                 'deadline'    => Carbon::now()->addMonths(2)->toDateString(),
+                'title'       => 'Science Project',
+                'status'      => 'not-started',
             ],
         ];
 
