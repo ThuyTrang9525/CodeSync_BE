@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
 use App\Models\Student;
@@ -22,10 +23,37 @@ class StudentController extends Controller
         return response()->json(Student::all());
     }
 
-    public function getClasses()
-    {
-        return response()->json(ClassGroup::all());
-    }
+//    public function getStudentClasses()
+// {
+//     $user = Auth::user();
+
+//     // Kiểm tra quyền truy cập
+//     if (!$user || $user->role !== 'STUDENT') {
+//         return response()->json([
+//             'status' => 'error',
+//             'message' => 'Unauthorized'
+//         ], 403);
+//     }
+
+//     // Lấy thông tin sinh viên dựa trên userID
+//     $student = Student::where('userID', $user->userID)->first();
+
+//     if (!$student) {
+//         return response()->json([
+//             'status' => 'error',
+//             'message' => 'Student not found'
+//         ], 404);
+//     }
+
+//     // Lấy danh sách lớp học có kèm thông tin giáo viên
+//     $classes = $student->classGroups()->with(['teacher'])->get();
+
+//     return response()->json([
+//         'student' => $user->name ?? $user->email,
+//         'classes' => $classes
+//     ]);
+// }
+
 
     // GET /api/students/{id}
     public function show($id)
@@ -101,8 +129,8 @@ class StudentController extends Controller
             return response()->json(['message' => 'Student record not found'], 404);
         }
 
-    // Query goals for the student
-    $query = Goal::where('userID', $student->userID);
+        // Query goals for the student
+        $query = Goal::where('userID', $student->userID);
 
         // Optional semester filter
         if ($request->has('semester')) {
@@ -167,12 +195,12 @@ class StudentController extends Controller
     /**
      * Store a newly created goal.
      */
-public function storeGoal(Request $request)
-{
-    $user = Auth::user();  // Get the authenticated user
-    if ($user->role !== 'STUDENT') {
-        return response()->json(['message' => 'Only students can create goals'], 403);
-    }
+    public function storeGoal(Request $request)
+    {
+        $user = Auth::user();  // Get the authenticated user
+        if ($user->role !== 'STUDENT') {
+            return response()->json(['message' => 'Only students can create goals'], 403);
+        }
 
     // Gán validate vào biến $validated
     $validated = $request->validate([
@@ -184,7 +212,7 @@ public function storeGoal(Request $request)
         'week' => 'sometimes|integer',
     ]);
 
-    $status = $request->has('status') ? $request->status : 'not-started';
+        $status = $request->has('status') ? $request->status : 'not-started';
 
     $goal = Goal::create([
         'title' => $validated['title'],
@@ -265,16 +293,16 @@ public function storeGoal(Request $request)
 
 
     public function getStudyPlansBySemester($semester)
-{
-    $userId = Auth::id();
+    {
+        $userId = Auth::id();
 
-    return response()->json(
-        StudyPlan::where('userID', $userId)
-            ->where('semester', $semester)
-            ->orderBy('date', 'desc')
-            ->get()
-    );
-}
+        return response()->json(
+            StudyPlan::where('userID', $userId)
+                ->where('semester', $semester)
+                ->orderBy('date', 'desc')
+                ->get()
+        );
+    }
 
 
 public function getSelfPlansBySemester($semester)
@@ -306,7 +334,7 @@ public function createSelfPlan(Request $request)
         'notes' => 'nullable|string',
     ]);
 
-    $data['userID'] = Auth::id();
+        $data['userID'] = Auth::id();
 
     return response()->json(SelfStudyPlan::create($data), 200);
 }
@@ -330,18 +358,18 @@ public function createStudyPlan(Request $request)
             'time_allocation' => 'nullable|integer',
         ]);
 
-        $validated['userID'] = Auth::id();
+            $validated['userID'] = Auth::id();
 
         $plan = SelfStudyPlan::create($validated);
 
-        if (!$plan) {
-            return response()->json(['message' => 'Không thể lưu kế hoạch học tập'], 500);
-        }
+            if (!$plan) {
+                return response()->json(['message' => 'Không thể lưu kế hoạch học tập'], 500);
+            }
 
-        return response()->json(['message' => 'Tạo thành công', 'data' => $plan], 201);
-    } catch (\Exception $e) {
-        // Ghi log nếu muốn
-        Log::error('Lỗi khi tạo study plan: ' . $e->getMessage());
+            return response()->json(['message' => 'Tạo thành công', 'data' => $plan], 201);
+        } catch (\Exception $e) {
+            // Ghi log nếu muốn
+            Log::error('Lỗi khi tạo study plan: ' . $e->getMessage());
 
         // Trả lại lỗi cụ thể cho Postman
         return response()->json([
@@ -417,34 +445,34 @@ public function getStudyPlansBySemesterAndWeek($semester, $week)
 
         return response()->json(['message' => 'Study plan deleted']);
     }
-public function getStudentClasses()
-{
-    $user = Auth::user();
+    public function getStudentClasses()
+    {
+        $user = Auth::user();
 
-    // Kiểm tra quyền truy cập
-    if (!$user || $user->role !== 'STUDENT') {
+        // Kiểm tra quyền truy cập
+        if (!$user || $user->role !== 'STUDENT') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        // Lấy thông tin sinh viên dựa trên userID
+        $student = Student::where('userID', $user->userID)->first();
+
+        if (!$student) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Student not found'
+            ], 404);
+        }
+
+        // Lấy danh sách lớp học có kèm thông tin giáo viên
+        $classes = $student->classGroups()->with(['teacher'])->get();
+
         return response()->json([
-            'status' => 'error',
-            'message' => 'Unauthorized'
-        ], 403);
+            'student' => $user->name ?? $user->email,
+            'classes' => $classes
+        ]);
     }
-
-    // Lấy thông tin sinh viên dựa trên userID
-    $student = Student::where('userID', $user->userID)->first();
-
-    if (!$student) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Student not found'
-        ], 404);
     }
-
-    // Lấy danh sách lớp học có kèm thông tin giáo viên
-    $classes = $student->classGroups()->with(['teacher'])->get();
-
-    return response()->json([
-        'student' => $user->name ?? $user->email,
-        'classes' => $classes
-    ]);
-}
-}
