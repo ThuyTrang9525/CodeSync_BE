@@ -89,7 +89,7 @@ public function login(Request $request)
     $request->validate([
         'email'    => 'required|email',
         'password' => 'required',
-        'role'     => 'required|in:STUDENT,TEACHER'
+        'role'     => 'required|in:STUDENT,TEACHER,ADMIN'
     ]);
 
     $user = User::where('email', $request->email)
@@ -112,8 +112,8 @@ public function login(Request $request)
         $extraData = Student::where('userID', $user->userID)->first();
     } elseif ($user->role === 'TEACHER') {
         $extraData = Teacher::where('userID', $user->userID)->first();
-        if ($extraData) {
-            $classes = ClassGroup::where('userID', $extraData->userID)->get();
+    if ($extraData) {
+        $classes = ClassGroup::where('userID', $extraData->userID)->get();
         }
     }
 

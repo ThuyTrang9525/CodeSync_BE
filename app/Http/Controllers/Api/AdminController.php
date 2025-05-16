@@ -63,6 +63,13 @@ class AdminController extends Controller
         return response()->json(['message' => 'Đã xóa']);
     }
 
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+        $user->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Logged out successfully']);
+    }
     //////////////////////////////////////////////////////////////////////// User
     public function indexUsers()
     {
