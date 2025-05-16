@@ -34,12 +34,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route::post('/notifications/{notificationID}/read', [StudentController::class, 'markAsRead']);
 });
 
- Route::delete('/notifications/{notificationID}', [StudentController::class, 'deleteNotification']);
- Route::post('/notifications/{notificationID}/read', [StudentController::class, 'markAsRead']);
- Route::get('/notifications/{receiverID}', [StudentController::class, 'getNotificationsByUser']);
+ Route::delete('/student/notifications/{notificationID}', [StudentController::class, 'deleteNotification']);
+ Route::post('/student/notifications/{notificationID}/read', [StudentController::class, 'markAsRead']);
+ Route::get('/student/notifications/{receiverID}', [StudentController::class, 'getNotificationsByUser']);
 
 Route::middleware('auth:sanctum')->get('/teacher/classes', [TeacherController::class, 'getTeacherClasses']);
 Route::get('/classes/{classId}/students', [TeacherController::class, 'getStudentsByClass']);
+Route::get('/notifications/{receiverID}', [TeacherController::class, 'getNotificationsByUser']);
 
 Route::prefix('admin')->group(function () {
     Route::get('users', [AdminController::class, 'indexUsers']);

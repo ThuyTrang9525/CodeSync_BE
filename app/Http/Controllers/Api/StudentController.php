@@ -420,7 +420,7 @@ class StudentController extends Controller
 
 
     // Lấy danh sách thông báo của người dùng
-   public function getNotificationsByUser($receiverID)
+  public function getNotificationsByUser($receiverID)
 {
     try {
         $notifications = DB::table('notifications')
@@ -433,7 +433,15 @@ class StudentController extends Controller
                 'notifications.createdAt',
                 'notifications.isRead',
                 'class_groups.className',
-                'users.name as senderName' 
+                'users.name as senderName'
+            )
+            ->groupBy(
+                'notifications.notificationID',
+                'notifications.content',
+                'notifications.createdAt',
+                'notifications.isRead',
+                'class_groups.className',
+                'users.name'
             )
             ->orderBy('notifications.createdAt', 'desc')
             ->get();
