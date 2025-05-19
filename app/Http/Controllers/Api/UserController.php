@@ -9,6 +9,8 @@ use App\Models\Teacher;
 use Illuminate\Validation\Rule;
 use App\Models\User;
 use App\Models\ClassGroup;
+use Illuminate\Support\Facades\DB;
+
 
 use Illuminate\Http\Request;
 
@@ -126,5 +128,6 @@ public function login(Request $request)
     ]);
 
 }
+
 
 }
