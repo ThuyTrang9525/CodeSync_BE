@@ -475,4 +475,66 @@ public function getStudyPlansBySemesterAndWeek($semester, $week)
             'classes' => $classes
         ]);
     }
+    public function getNotificationsByUser($receiverID)
+{
+    try {
+        $notifications = DB::table('notifications')
+            ->where('notifications.receiverID', $receiverID)
+            ->leftJoin('users', 'notifications.senderID', '=', 'users.userID') 
+            ->leftJoin('class_groups', 'notifications.classID', '=', 'class_groups.classID')
+            ->select(
+                'notifications.notificationID',
+                'notifications.content',
+                'notifications.createdAt',
+                'notifications.isRead',
+                'class_groups.className',
+                'users.name as senderName'
+            )
+            ->groupBy(
+                'notifications.notificationID',
+                'notifications.content',
+                'notifications.createdAt',
+                'notifications.isRead',
+                'class_groups.className',
+                'users.name'
+            )
+            ->orderBy('notifications.createdAt', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $notifications
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to fetch notifications',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+    //xóa thông báo và dánh dấu đã đọc
+    public function deleteNotification($notificationID)
+    {
+        try {
+            DB::table('notifications')->where('notificationID', $notificationID)->delete();
+            return response()->json(['status' => 'success']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function markAsRead($notificationID)
+    {
+        try {
+            DB::table('notifications')
+                ->where('notificationID', $notificationID)
+                ->update(['isRead' => 1]);
+            return response()->json(['status' => 'success']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
     }
