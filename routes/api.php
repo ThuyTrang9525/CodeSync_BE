@@ -26,17 +26,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/goals/{goal}', [StudentController::class, 'updateGoal']);
     Route::delete('/goals/{goal}', [StudentController::class, 'destroyGoal']);
     Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
-    // Get all class groups for student
-    // Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
-    // Get all notifications for student
-    // Route::get('/notifications/{receiverID}', [StudentController::class, 'getNotificationsByUser']);
-    // Route::delete('/notifications/{notificationID}', [StudentController::class, 'deleteNotification']);
-    // Route::post('/notifications/{notificationID}/read', [StudentController::class, 'markAsRead']);
+    // profile student đã đăng nhập
+    Route::get('/student/profile', [StudentController::class, 'getProfile']);
+     //cập nhật profile
+    Route::put('/student/profile/{userID}', [UserController::class, 'updateProfile']);
 });
-
- Route::delete('/student/notifications/{notificationID}', [StudentController::class, 'deleteNotification']);
- Route::post('/student/notifications/{notificationID}/read', [StudentController::class, 'markAsRead']);
- Route::get('/student/notifications/{receiverID}', [StudentController::class, 'getNotificationsByUser']);
+// Get all notifications for student
+Route::delete('/student/notifications/{notificationID}', [StudentController::class, 'deleteNotification']);
+Route::post('/student/notifications/{notificationID}/read', [StudentController::class, 'markAsRead']);
+Route::get('/student/notifications/{receiverID}', [StudentController::class, 'getNotificationsByUser']);
 
 Route::middleware('auth:sanctum')->get('/teacher/classes', [TeacherController::class, 'getTeacherClasses']);
 Route::get('/classes/{classId}/students', [TeacherController::class, 'getStudentsByClass']);
@@ -81,10 +79,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/student/inclass-plans/{id}', [StudentController::class, 'updateSelfPlan']);
     Route::delete('/student/inclass-plans/{id}', [StudentController::class, 'deleteSelfPlan']);
     // Study Plans by Semester & Week
-Route::get('/student/study-plans/semester/{semester}/week/{week}', [StudentController::class, 'getStudyPlansBySemesterAndWeek']);
+    Route::get('/student/study-plans/semester/{semester}/week/{week}', [StudentController::class, 'getStudyPlansBySemesterAndWeek']);
 
-// In-Class Plans by Semester & Week
-Route::get('/student/inclass-plans/semester/{semester}/week/{week}', [StudentController::class, 'getSelfPlansBySemesterAndWeek']);
-Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
-
+    // In-Class Plans by Semester & Week
+    Route::get('/student/inclass-plans/semester/{semester}/week/{week}', [StudentController::class, 'getSelfPlansBySemesterAndWeek']);
+    Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
 });
