@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens; // Thêm trait này
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable; // Thêm HasApiTokens vào đây
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $table = 'users';
     protected $primaryKey = 'userID';
@@ -39,7 +38,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
      * @return array<string, string>
      */
@@ -51,27 +50,27 @@ class User extends Authenticatable
         ];
     }
 
+    // Quan hệ 1-1 với Student (userID)
     public function student()
     {
-        return $this->hasOne(Student::class, 'userID', 'id');
+        return $this->hasOne(Student::class, 'userID', 'userID');
     }
 
-    public function classGroups() {
-        return $this->hasMany(ClassGroup::class, 'userID');
-    }
-
-    public function goal()
+    // Quan hệ 1-n với ClassGroup (userID)
+    public function classGroups()
     {
-        return $this->hasMany(Goal::class, 'usesID');
+        return $this->hasMany(ClassGroup::class, 'userID', 'userID');
     }
 
-    public function notify()
+    // Quan hệ 1-n với Goal (userID)
+    public function goals()
     {
-        return $this->hasMany(Notification::class, 'usesID');
+        return $this->hasMany(Goal::class, 'userID', 'userID');
     }
-    
-    public function teacher()
-        {
-            return $this->hasOne(Teacher::class, 'userID', 'userID');
-        }
+
+    // Quan hệ 1-n với Notification (userID)
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'userID', 'userID');
+    }
 }
