@@ -64,6 +64,9 @@ Route::prefix('admin')->group(function () {
     Route::post('/notifications/{id}/read', [AdminController::class, 'markAsRead']);
 
     Route::get('notifications', [AdminController::class, 'getNotifications']);
+
+    // Route::get('report', [AdminController::class, 'report']);
+    Route::get('reports', [AdminController::class, 'getStudentReport']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {

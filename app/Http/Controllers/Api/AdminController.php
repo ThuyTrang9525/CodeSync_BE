@@ -10,6 +10,10 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\Goal;
 use App\Models\Notification;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
+
+
 
 class AdminController extends Controller
 {
@@ -69,6 +73,40 @@ class AdminController extends Controller
         $user->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Logged out successfully']);
+    }
+
+    public function getStudentReport()
+        {
+            return User::where('role', 'STUDENT')
+                    ->with('student')  // load quan hệ student
+                    ->get();
+        }
+
+
+
+
+
+    public function report(){
+        $today = Carbon::today();
+
+        $students = DB::table('goals')
+            ->join('students', 'goals.userID', '=', 'students.userID')
+            ->join('users as student_users', 'students.userID', '=', 'student_users.userID')
+            ->join('teachers', 'teachers.userID', '=', 'students.userID') // nếu students có userID
+            ->join('class_groups', 'class_groups.userID', '=', 'teachers.userID')
+            ->select(
+                'student_users.name as username',
+                'student_users.email',
+                'class_groups.className as class'
+            )
+            // ->where('goals.deadline', '<', $today)
+            ->distinct()
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $students
+        ]);
     }
     //////////////////////////////////////////////////////////////////////// User
     public function indexUsers()
