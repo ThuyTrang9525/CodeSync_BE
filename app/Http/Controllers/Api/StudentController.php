@@ -506,6 +506,7 @@ class StudentController extends Controller
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
+
     //API lấy thông tin profile (chỉ name và email)
     public function showProfile($userID)
     {

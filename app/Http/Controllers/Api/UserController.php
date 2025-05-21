@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\User;
 use App\Models\Student;
+use App\Models\ClassGroup;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
