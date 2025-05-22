@@ -10,8 +10,9 @@ class ClassGroup extends Model
         {
             return $this->belongsTo(Teacher::class, 'userID');
         }
-    protected $table = 'class_groups'; 
-    protected $primaryKey = 'classID';
+
+        protected $table = 'class_groups'; 
+        protected $primaryKey = 'classID';
 
 
     public function students()
@@ -22,5 +23,9 @@ class ClassGroup extends Model
         {
             return $this->belongsTo(User::class, 'userID');
         }
-
+   
+    public function classGroupStudents()
+        {
+            return $this->hasMany(ClassGroupStudent::class, 'classID', 'classID');
+        }
 }
