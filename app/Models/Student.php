@@ -26,7 +26,7 @@ class Student extends Model
     // Quan hệ với User
     public function user()
     {
-        return $this->belongsTo(User::class, 'userID', 'userID');
+        return $this->hasOne(User::class, 'userID', 'userID');
     }
 
     // Quan hệ với lớp học (dùng userID)
@@ -39,5 +39,10 @@ class Student extends Model
     public function goals()
     {
         return $this->hasMany(Goal::class, 'userID', 'userID');
+    }
+
+    public function classGroupStudents()
+    {
+        return $this->hasMany(ClassGroupStudent::class, 'userID', 'userID');
     }
 }

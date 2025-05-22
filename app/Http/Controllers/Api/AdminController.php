@@ -78,36 +78,36 @@ class AdminController extends Controller
     public function getStudentReport()
         {
             return User::where('role', 'STUDENT')
-                    ->with('student')  // load quan hệ student
+                    ->with('student')  
                     ->get();
         }
 
+   
+   public function getGoalsbyStudent($userID)
+{
+    $student = Student::with(['classGroups', 'user'])->findOrFail($userID);
+
+    $classNames = $student->classGroups->pluck('className')->unique()->toArray();
+
+    $classIDs = $student->classGroups->pluck('classID')->unique()->toArray();
+
+    $goals = Goal::where('userID', $userID)
+        ->whereIn('subject', $classNames)
+        ->get();
+
+    return response()->json([
+        'userID' => $student->userID,
+        'name' => $student->user->name ?? null,
+        'email' => $student->user->email ?? null,
+        'class_groups' => $student->classGroups,
+        'goals' => $goals,
+    ]);
+}
 
 
 
 
-    public function report(){
-        $today = Carbon::today();
 
-        $students = DB::table('goals')
-            ->join('students', 'goals.userID', '=', 'students.userID')
-            ->join('users as student_users', 'students.userID', '=', 'student_users.userID')
-            ->join('teachers', 'teachers.userID', '=', 'students.userID') // nếu students có userID
-            ->join('class_groups', 'class_groups.userID', '=', 'teachers.userID')
-            ->select(
-                'student_users.name as username',
-                'student_users.email',
-                'class_groups.className as class'
-            )
-            // ->where('goals.deadline', '<', $today)
-            ->distinct()
-            ->get();
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $students
-        ]);
-    }
     //////////////////////////////////////////////////////////////////////// User
     public function indexUsers()
     {
@@ -121,24 +121,36 @@ class AdminController extends Controller
         return response()->json($user);
     }
 
-    public function storeUser(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'role' => 'required|in:STUDENT,TEACHER,ADMIN',
-        ]);
+   public function storeUser(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string',
+        'email' => 'required|string|email|unique:users,email',
+        'password' => 'required|string|min:6',
+        'role' => 'required|in:STUDENT,TEACHER,ADMIN',
+    ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'role' => $request->role,
-        ]);
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => bcrypt($request->password),
+        'role' => $request->role,
+    ]);
 
-        return response()->json($user, 201);
+    // Xóa hoặc comment dòng này để không ngắt xử lý
+    // dd($user);
+
+    if ($user->role === 'STUDENT') {
+        Student::create([
+        'userID' => $user->userID, 
+]);
     }
+
+    return response()->json($user, 201);
+}
+
+
+
 
     public function updateUser(Request $request, $id)
     {
