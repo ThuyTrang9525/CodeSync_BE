@@ -14,8 +14,11 @@ class Teacher extends Model
         return $this->belongsTo(User::class, 'userID');
     }
     public function classGroups()
-{
-    return $this->hasMany(ClassGroup::class, 'userID');
-}
-
+    {
+        return $this->hasMany(ClassGroup::class, 'userID');
+    }
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'userID', 'userID');
+    }
 }

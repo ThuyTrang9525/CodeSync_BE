@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
 use App\Models\Student;
 use App\Models\ClassGroup;
+use App\Models\Comment;
 use Illuminate\Http\Request;
 use App\Models\Goal;
 use App\Models\StudyPlan;
@@ -174,7 +175,7 @@ class StudentController extends Controller
     /**
      * Display goals for a specific semester.
      */
-    public function getSemesterGoals($semester)
+    public function getSemesterGoals($semester, $week)
     {
         // Get the authenticated user
         $user = Auth::user();
@@ -187,6 +188,8 @@ class StudentController extends Controller
         // Get goals for the specified semester
         $goals = Goal::where('userID', $user->userID)
             ->where('semester', $semester)
+            ->where('week', $week)
+            ->orderBy('deadline')
             ->get();
 
         return GoalResource::collection($goals);
@@ -322,7 +325,6 @@ public function createSelfPlan(Request $request)
     $data = $request->validate([
         'semester' => 'required|string',
         'date' => 'required|date',
-        'semester' => 'required|string',
         'week' => 'required|integer',
         'skill' => 'required|string',
         'lessonSummary' => 'nullable|string',
@@ -341,43 +343,25 @@ public function createSelfPlan(Request $request)
 
 
     // Tạo mới study plan
-public function createStudyPlan(Request $request)
-{
-    try {
-        $validated = $request->validate([
-            'week' => 'required|integer',
+    public function createInClassPlan(Request $request)
+    {
+        $data = $request->validate([
+            'type' => 'in:in_class',
             'semester' => 'required|string',
+            'week' => 'required|integer',
             'date' => 'required|date',
             'skill' => 'required|string',
             'lessonSummary' => 'nullable|string',
-            'concentration' => 'nullable|integer',
-            'resources' => 'nullable|string',
-            'activities' => 'nullable|string',
-            'evaluation' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'time_allocation' => 'nullable|integer',
+            'selfAssessment' => 'nullable|integer',
+            'difficulties' => 'nullable|string',
+            'planToImprove' => 'nullable|string',
+            'problemSolved' => 'nullable|boolean',
         ]);
 
-            $validated['userID'] = Auth::id();
+        $data['userID'] = Auth::id();
 
-        $plan = SelfStudyPlan::create($validated);
-
-            if (!$plan) {
-                return response()->json(['message' => 'Không thể lưu kế hoạch học tập'], 500);
-            }
-
-            return response()->json(['message' => 'Tạo thành công', 'data' => $plan], 201);
-        } catch (\Exception $e) {
-            // Ghi log nếu muốn
-            Log::error('Lỗi khi tạo study plan: ' . $e->getMessage());
-
-        // Trả lại lỗi cụ thể cho Postman
-        return response()->json([
-            'message' => 'Đã xảy ra lỗi',
-            'error' => $e->getMessage()
-        ], 500);
+        return response()->json(StudyPlan::create($data), 201);
     }
-}
 public function getSelfPlansBySemesterAndWeek($semester, $week)
 {
     $userId = Auth::id();
@@ -395,7 +379,7 @@ public function getStudyPlansBySemesterAndWeek($semester, $week)
     $userId = Auth::id();
 
     return response()->json(
-        SelfStudyPlan::where('userID', $userId)
+        StudyPlan::where('userID', $userId)
             ->where('semester', $semester)
             ->where('week', $week)
             ->orderBy('date', 'desc')
@@ -405,16 +389,16 @@ public function getStudyPlansBySemesterAndWeek($semester, $week)
 
 
     // Cập nhật study plan
-    public function updateStudyPlan(Request $request, $id)
+    public function updateSelfStudyPlan(Request $request, $planID)
     {
-        $plan = SelfStudyPlan::findOrFail($id);
+        $plan = SelfStudyPlan::findOrFail($planID);
 
         if ($plan->userID !== Auth::id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $validated = $request->validate([
-            'type' => 'in:SELF_STUDY,IN_CLASS',
+            'type' => 'in:SELF_STUDY',
             'semester' => 'string',
             'date' => 'date',
             'skill' => 'string',
@@ -431,20 +415,32 @@ public function getStudyPlansBySemesterAndWeek($semester, $week)
 
         return response()->json($plan);
     }
-
-    // Xóa study plan
-    public function deleteStudyPlan($id)
+    public function updateStudyPlan(Request $request, $planID)
     {
-        $plan = SelfStudyPlan::findOrFail($id);
+        $plan = StudyPlan::findOrFail($planID);
 
         if ($plan->userID !== Auth::id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $plan->delete();
+        $validated = $request->validate([
+          
+            'semester' => 'required|string',
+            'date' => 'required|date',
+            'skill' => 'required|string',
+            'lessonSummary' => 'nullable|string',
+            'selfAssessment' => 'nullable|integer',
+            'difficulties' => 'nullable|string',
+            'planToImprove' => 'nullable|string',
+            'problemSolved' => 'nullable|boolean',
+        ]);
 
-        return response()->json(['message' => 'Study plan deleted']);
+        $plan->update($validated);
+
+        return response()->json($plan);
     }
+
+
     public function getStudentClasses()
     {
         $user = Auth::user();
@@ -475,4 +471,163 @@ public function getStudyPlansBySemesterAndWeek($semester, $week)
             'classes' => $classes
         ]);
     }
+     public function getNotificationsByUser($receiverID)
+{
+    try {
+        $notifications = DB::table('notifications')
+            ->where('notifications.receiverID', $receiverID)
+            ->leftJoin('users', 'notifications.senderID', '=', 'users.userID') 
+            ->leftJoin('class_groups', 'notifications.classID', '=', 'class_groups.classID')
+            ->select(
+                'notifications.notificationID',
+                'notifications.content',
+                'notifications.createdAt',
+                'notifications.isRead',
+                'class_groups.className',
+                'users.name as senderName'
+            )
+            ->groupBy(
+                'notifications.notificationID',
+                'notifications.content',
+                'notifications.createdAt',
+                'notifications.isRead',
+                'class_groups.className',
+                'users.name'
+            )
+            ->orderBy('notifications.createdAt', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $notifications
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to fetch notifications',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+    //xóa thông báo và dánh dấu đã đọc
+    public function deleteNotification($notificationID)
+    {
+        try {
+            DB::table('notifications')->where('notificationID', $notificationID)->delete();
+            return response()->json(['status' => 'success']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function markAsRead($notificationID)
+    {
+        try {
+            DB::table('notifications')
+                ->where('notificationID', $notificationID)
+                ->update(['isRead' => 1]);
+            return response()->json(['status' => 'success']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+public function storeComment(Request $request)
+{
+    $request->validate([
+        'planID' => 'required|integer',
+        'planType' => 'required|string|in:in_class,study',
+        'senderID' => 'required|integer',
+        'content' => 'required|string'
+    ]);
+
+    $senderID = $request->senderID;
+    $receiverID = null;
+
+    // Tìm người bị tag thông qua email (dạng @email@example.com)
+    preg_match('/@([^\s]+)/', $request->content, $matches);
+
+    if ($matches) {
+        $email = $matches[1];
+
+        $user = DB::table('users')
+            ->where('email', $email)
+            ->select('userID')
+            ->first();
+
+        if ($user) {
+            $receiverID = $user->userID;
+        }
+    }
+
+    // Tạo comment mới
+    $commentID = DB::table('comments')->insertGetId([
+        'planID' => $request->planID,
+        'planType' => $request->planType,
+        'senderID' => $senderID,
+        'receiverID' => $receiverID,
+        'content' => $request->content,
+        'createdAt' => now(),
+        'updatedAt' => now()
+    ]);
+
+    // Nếu có người được tag => thêm notification
+    if ($receiverID) {
+        DB::table('notifications')->insert([
+            'receiverID' => $receiverID,
+            'content' => 'Bạn được tag trong một bình luận: "' . $request->content . '"',
+            'type' => 'INTERACTION',
+            'isRead' => 0,
+            'createdAt' => now(),
+            'senderID' => $senderID,
+            'classID' => null // nếu có classID thì thay thế ở đây
+        ]);
+    }
+
+    return response()->json([
+        'commentID' => $commentID,
+        'planID' => $request->planID,
+        'planType' => $request->planType,
+        'senderID' => $senderID,
+        'receiverID' => $receiverID,
+        'content' => $request->content,
+        'createdAt' => now(),
+        'updatedAt' => now()
+    ], 201);
+}
+
+    // Lấy tất cả bình luận theo entryID
+public function getComments(Request $request)
+{
+    $request->validate([
+        'planID' => 'required|integer',
+        'planType' => 'required|string|in:in_class,study',
+    ]);
+
+    $planID = $request->planID;
+    $planType = $request->planType;
+
+    $comments = DB::table('comments')
+        ->where('planID', $planID)
+        ->where('planType', $planType)
+        ->where('isResolved', false) 
+        ->orderBy('createdAt', 'desc')
+        ->get();
+
+    return response()->json($comments);
+}
+
+public function markAsResolved($commentID)
+{
+    $updated = DB::table('comments')
+        ->where('commentID', $commentID)
+        ->update(['isResolved' => true]);
+
+    if ($updated) {
+        return response()->json(['message' => 'Comment marked as resolved']);
+    }
+
+    return response()->json(['error' => 'Comment not found'], 404);
+}
     }
