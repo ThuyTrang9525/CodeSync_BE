@@ -29,4 +29,14 @@ class Comment extends Model
     {
         return $this->belongsTo(User::class, 'receiverID', 'userID');
     }
+
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class, 'userID', 'userID');
+    }
+
+    public function journalEntry()
+    {
+        return $this->belongsTo(JournalEntry::class, 'entryID', 'entryID');
+    }
 }
