@@ -36,8 +36,8 @@ class Comment extends Model
         return $this->belongsTo(Teacher::class, 'userID', 'userID');
     }
 
-    public function journalEntry()
-    {
-        return $this->belongsTo(JournalEntry::class, 'entryID', 'entryID');
-    }
+    // public function journalEntry()
+    // {
+    //     return $this->belongsTo(JournalEntry::class, 'entryID', 'entryID');
+    // }
 }
