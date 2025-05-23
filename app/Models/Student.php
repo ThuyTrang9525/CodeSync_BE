@@ -37,4 +37,14 @@ class Student extends Model
     {
         return $this->hasMany(Goal::class, 'userID', 'userID');
     }
+    public function studyPlans()
+    {
+        return $this->hasMany(StudyPlan::class, 'userID', 'userID');
+    }
+
+    // Quan hệ với SelfStudyPlan
+    public function selfStudyPlans()
+    {
+        return $this->hasMany(SelfStudyPlan::class, 'userID', 'userID');
+    }
 }

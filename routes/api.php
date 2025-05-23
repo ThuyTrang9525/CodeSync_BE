@@ -6,8 +6,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\TeacherController;
-
-
+use App\Models\Teacher;
 
 Route::apiResource('/users', UserController::class);
 Route::apiResource('/students', StudentController::class);
@@ -41,6 +40,13 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->get('/teacher/classes', [TeacherController::class, 'getTeacherClasses']);
 Route::get('/classes/{classId}/students', [TeacherController::class, 'getStudentsByClass']);
 Route::get('/notifications/{receiverID}', [TeacherController::class, 'getNotificationsByUser']);
+Route::get('/teacher/students/{id}', [TeacherController::class, 'showStudent']);
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::post('/comments/send', [TeacherController::class, 'send']);
+//     Route::get('/comments/history/{userId}', [TeacherController::class, 'history']);
+// });
+Route::post('/comments/send', [TeacherController::class, 'send']);
+Route::get('/comments/history/{userId}', [TeacherController::class, 'history']);
 
 Route::prefix('admin')->group(function () {
     Route::get('users', [AdminController::class, 'indexUsers']);

@@ -12,6 +12,7 @@ use App\Models\Goal;
 use App\Models\StudyPlan;
 use App\Models\SelfStudyPlan;
 use App\Http\Resources\GoalResource;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 
