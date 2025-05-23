@@ -34,17 +34,13 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::delete('/student/notifications/{notificationID}', [StudentController::class, 'deleteNotification']);
 Route::post('/student/notifications/{notificationID}/read', [StudentController::class, 'markAsRead']);
 Route::get('/student/notifications/{receiverID}', [StudentController::class, 'getNotificationsByUser']);
-
+/////
 Route::middleware('auth:sanctum')->get('/teacher/classes', [TeacherController::class, 'getTeacherClasses']);
 Route::get('/classes/{classId}/students', [TeacherController::class, 'getStudentsByClass']);
 Route::get('/notifications/{receiverID}', [TeacherController::class, 'getNotificationsByUser']);
 Route::get('/teacher/students/{id}', [TeacherController::class, 'showStudent']);
-// Route::middleware('auth:sanctum')->group(function () {
-//     Route::post('/comments/send', [TeacherController::class, 'send']);
-//     Route::get('/comments/history/{userId}', [TeacherController::class, 'history']);
-// });
 Route::post('/comments/send', [TeacherController::class, 'send']);
-Route::get('/comments/history/{userId}', [TeacherController::class, 'history']);
+Route::get('/comments/history/{userId}/{classID}', [TeacherController::class, 'history']);
 
 Route::prefix('admin')->group(function () {
     Route::get('users', [AdminController::class, 'indexUsers']);
@@ -63,7 +59,7 @@ Route::prefix('admin')->group(function () {
     Route::get('goals', [AdminController::class, 'getGoals']);
     Route::middleware('auth:api')->post('logout', [AdminController::class, 'logout']);
 
-    Route::patch('/notifications/{id}/mark-read', [AdminController::class, 'markRead']);
+    Route::post('/notifications/{id}/read', [AdminController::class, 'markRead']);
     Route::delete('/notifications/{id}', [AdminController::class, 'destroy']);
     Route::post('/notifications/{id}/read', [AdminController::class, 'markAsRead']);
 
