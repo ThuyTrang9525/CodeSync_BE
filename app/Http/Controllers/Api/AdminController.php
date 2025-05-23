@@ -10,6 +10,10 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\Goal;
 use App\Models\Notification;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
+
+
 
 class AdminController extends Controller
 {
@@ -70,6 +74,40 @@ class AdminController extends Controller
 
         return response()->json(['message' => 'Logged out successfully']);
     }
+
+    public function getStudentReport()
+        {
+            return User::where('role', 'STUDENT')
+                    ->with('student')  
+                    ->get();
+        }
+
+   
+   public function getGoalsbyStudent($userID)
+{
+    $student = Student::with(['classGroups', 'user'])->findOrFail($userID);
+
+    $classNames = $student->classGroups->pluck('className')->unique()->toArray();
+
+    $classIDs = $student->classGroups->pluck('classID')->unique()->toArray();
+
+    $goals = Goal::where('userID', $userID)
+        ->whereIn('subject', $classNames)
+        ->get();
+
+    return response()->json([
+        'userID' => $student->userID,
+        'name' => $student->user->name ?? null,
+        'email' => $student->user->email ?? null,
+        'class_groups' => $student->classGroups,
+        'goals' => $goals,
+    ]);
+}
+
+
+
+
+
     //////////////////////////////////////////////////////////////////////// User
     public function indexUsers()
     {
@@ -83,24 +121,36 @@ class AdminController extends Controller
         return response()->json($user);
     }
 
-    public function storeUser(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'role' => 'required|in:STUDENT,TEACHER,ADMIN',
-        ]);
+   public function storeUser(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string',
+        'email' => 'required|string|email|unique:users,email',
+        'password' => 'required|string|min:6',
+        'role' => 'required|in:STUDENT,TEACHER,ADMIN',
+    ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'role' => $request->role,
-        ]);
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => bcrypt($request->password),
+        'role' => $request->role,
+    ]);
 
-        return response()->json($user, 201);
+    // Xóa hoặc comment dòng này để không ngắt xử lý
+    // dd($user);
+
+    if ($user->role === 'STUDENT') {
+        Student::create([
+        'userID' => $user->userID, 
+]);
     }
+
+    return response()->json($user, 201);
+}
+
+
+
 
     public function updateUser(Request $request, $id)
     {

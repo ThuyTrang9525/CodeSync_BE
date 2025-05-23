@@ -6,8 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Student extends Model
 {
+    public $timestamps = false;
     protected $table = 'students';
     protected $primaryKey = 'userID';
+    public $incrementing = false;
+    protected $keyType = 'int';
 
     protected $fillable = [
         'userID',
@@ -20,10 +23,10 @@ class Student extends Model
         'bio',
     ];
 
-    // Quan hệ với user
+    // Quan hệ với User
     public function user()
     {
-        return $this->belongsTo(User::class, 'userID', 'userID');
+        return $this->hasOne(User::class, 'userID', 'userID');
     }
 
     // Quan hệ với lớp học (dùng userID)
@@ -32,7 +35,7 @@ class Student extends Model
         return $this->belongsToMany(ClassGroup::class, 'class_group_student', 'userID', 'classID');
     }
 
-
+    // Quan hệ với Goal (userID)
     public function goals()
     {
         return $this->hasMany(Goal::class, 'userID', 'userID');
@@ -46,5 +49,9 @@ class Student extends Model
     public function selfStudyPlans()
     {
         return $this->hasMany(SelfStudyPlan::class, 'userID', 'userID');
+    }
+    public function classGroupStudents()
+    {
+        return $this->hasMany(ClassGroupStudent::class, 'userID', 'userID');
     }
 }
