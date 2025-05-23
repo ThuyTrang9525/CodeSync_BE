@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Teacher;
 use App\Models\Student;
+use App\Models\User;
 use App\Models\Comment;
 use Illuminate\Validation\ValidationException;
 use App\Models\ClassGroup;
@@ -138,7 +139,7 @@ class TeacherController extends Controller
         ]);
     }
     public function send(Request $request)
-{
+    {
     $validated = $request->validate([
         'receiverID' => 'required|exists:users,userID',
         'classID' => 'required|exists:class_groups,classID',
@@ -162,7 +163,6 @@ class TeacherController extends Controller
     return response()->json($comment, 201);
 }
 
-
    public function history($userId, $classID)
 {
     $authId = Auth::id();
@@ -182,6 +182,5 @@ class TeacherController extends Controller
 
     return response()->json($messages);
 }
-
 
 }

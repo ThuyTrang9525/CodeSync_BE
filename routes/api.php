@@ -34,15 +34,11 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::delete('/student/notifications/{notificationID}', [StudentController::class, 'deleteNotification']);
 Route::post('/student/notifications/{notificationID}/read', [StudentController::class, 'markAsRead']);
 Route::get('/student/notifications/{receiverID}', [StudentController::class, 'getNotificationsByUser']);
-
+/////
 Route::middleware('auth:sanctum')->get('/teacher/classes', [TeacherController::class, 'getTeacherClasses']);
 Route::get('/classes/{classId}/students', [TeacherController::class, 'getStudentsByClass']);
 Route::get('/notifications/{receiverID}', [TeacherController::class, 'getNotificationsByUser']);
 Route::get('/teacher/students/{id}', [TeacherController::class, 'showStudent']);
-// Route::middleware('auth:sanctum')->group(function () {
-//     Route::post('/comments/send', [TeacherController::class, 'send']);
-//     Route::get('/comments/history/{userId}', [TeacherController::class, 'history']);
-// });
 Route::post('/comments/send', [TeacherController::class, 'send']);
 Route::get('/comments/history/{userId}/{classID}', [TeacherController::class, 'history']);
 
