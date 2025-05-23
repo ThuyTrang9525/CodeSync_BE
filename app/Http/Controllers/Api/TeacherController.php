@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Teacher;
 use App\Models\Student;
+use App\Models\Comment;
+use Illuminate\Validation\ValidationException;
 use App\Models\ClassGroup;
 use App\Models\Notification;
 use Illuminate\Http\Request;
@@ -119,5 +121,65 @@ class TeacherController extends Controller
         ], 500);
     }
 }
+    public function showStudent($id)
+    {
+        $student = Student::with(['user', 'goals', 'studyPlans', 'selfStudyPlans'])->find($id);
+
+        if (!$student) {
+            return response()->json(['message' => 'Student not found'], 404);
+        }
+
+        return response()->json([
+            'id' => $student->userID,
+            'profile' => $student->user,
+            'goals' => $student->goals, 
+            'study_plans' => $student->studyPlans,
+            'self_study_plans' => $student->selfStudyPlans,
+        ]);
+    }
+    public function send(Request $request)
+        {
+            $validated = $request->validate([
+                'receiverID' => 'required|exists:users,userID',
+                'content' => 'required|string',
+                'planID' => 'nullable|integer',
+                'planType' => 'nullable|string'
+            ]);
+
+            $comment = Comment::create([
+                'senderID' => Auth::id(),
+                'receiverID' => $validated['receiverID'],
+                'content' => $validated['content'],
+                'planID' => $validated['planID'] ?? 0,
+                'planType' => $validated['planType'] ?? 0,
+                'isResolved' => false,
+                'createdAt' => now(),
+                'updatedAt' => now(),
+            ]);
+
+            return response()->json($comment, 201);
+    }
+
+    // Lấy lịch sử tin nhắn giữa 2 người
+    public function history($userId)
+    {
+        //  if (!Auth::check()) {
+        //     return response()->json(['error' => 'Unauthenticated'], 401);
+        // }
+        $authId = Auth::id();
+
+        $messages = Comment::where(function ($query) use ($authId, $userId) {
+            $query->where('senderID', $authId)
+                  ->where('receiverID', $userId);
+        })
+        ->orWhere(function ($query) use ($authId, $userId) {
+            $query->where('senderID', $userId)
+                  ->where('receiverID', $authId);
+        })
+        ->orderBy('createdAt')
+        ->get();
+
+        return response()->json($messages);
+    }
 
 }

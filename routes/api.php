@@ -6,8 +6,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\TeacherController;
-
-
+use App\Models\Teacher;
 
 Route::apiResource('/users', UserController::class);
 Route::apiResource('/students', StudentController::class);
@@ -26,21 +25,26 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/goals/{goal}', [StudentController::class, 'updateGoal']);
     Route::delete('/goals/{goal}', [StudentController::class, 'destroyGoal']);
     Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
-    // Get all class groups for student
-    // Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
-    // Get all notifications for student
-    // Route::get('/notifications/{receiverID}', [StudentController::class, 'getNotificationsByUser']);
-    // Route::delete('/notifications/{notificationID}', [StudentController::class, 'deleteNotification']);
-    // Route::post('/notifications/{notificationID}/read', [StudentController::class, 'markAsRead']);
+    // profile student đã đăng nhập
+    Route::get('/student/profile', [StudentController::class, 'getProfile']);
+     //cập nhật profile
+    Route::put('/student/profile/{userID}', [UserController::class, 'updateProfile']);
 });
-
- Route::delete('/student/notifications/{notificationID}', [StudentController::class, 'deleteNotification']);
- Route::post('/student/notifications/{notificationID}/read', [StudentController::class, 'markAsRead']);
- Route::get('/student/notifications/{receiverID}', [StudentController::class, 'getNotificationsByUser']);
+// Get all notifications for student
+Route::delete('/student/notifications/{notificationID}', [StudentController::class, 'deleteNotification']);
+Route::post('/student/notifications/{notificationID}/read', [StudentController::class, 'markAsRead']);
+Route::get('/student/notifications/{receiverID}', [StudentController::class, 'getNotificationsByUser']);
 
 Route::middleware('auth:sanctum')->get('/teacher/classes', [TeacherController::class, 'getTeacherClasses']);
 Route::get('/classes/{classId}/students', [TeacherController::class, 'getStudentsByClass']);
 Route::get('/notifications/{receiverID}', [TeacherController::class, 'getNotificationsByUser']);
+Route::get('/teacher/students/{id}', [TeacherController::class, 'showStudent']);
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::post('/comments/send', [TeacherController::class, 'send']);
+//     Route::get('/comments/history/{userId}', [TeacherController::class, 'history']);
+// });
+Route::post('/comments/send', [TeacherController::class, 'send']);
+Route::get('/comments/history/{userId}', [TeacherController::class, 'history']);
 
 Route::prefix('admin')->group(function () {
     Route::get('users', [AdminController::class, 'indexUsers']);
@@ -64,6 +68,10 @@ Route::prefix('admin')->group(function () {
     Route::post('/notifications/{id}/read', [AdminController::class, 'markAsRead']);
 
     Route::get('notifications', [AdminController::class, 'getNotifications']);
+
+    // Route::get('report', [AdminController::class, 'report']);
+    Route::get('reports', [AdminController::class, 'getStudentReport']);
+        Route::get('getGoalsbyStudent/{userID}', [AdminController::class, 'getGoalsbyStudent']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -82,8 +90,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/student/self-study-plans/{id}', [StudentController::class, 'updateSelfStudyPlan']);
     Route::delete('/student/self-study-plans/{id}', [StudentController::class, 'updateSelfStudyPlan']);
     // Study Plans by Semester & Week
-Route::get('/student/study-plans/semester/{semester}/week/{week}', [StudentController::class, 'getStudyPlansBySemesterAndWeek']);
+    Route::get('/student/study-plans/semester/{semester}/week/{week}', [StudentController::class, 'getStudyPlansBySemesterAndWeek']);
 
+    // In-Class Plans by Semester & Week
+    Route::get('/student/inclass-plans/semester/{semester}/week/{week}', [StudentController::class, 'getSelfPlansBySemesterAndWeek']);
+    Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
 // In-Class Plans by Semester & Week
 Route::get('/student/self-study-plans/semester/{semester}/week/{week}', [StudentController::class, 'getSelfPlansBySemesterAndWeek']);
 Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
