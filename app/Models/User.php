@@ -55,7 +55,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(Student::class, 'userID', 'userID');
     }
-
+    public function teacher()
+        {
+            return $this->hasOne(Student::class, 'userID', 'userID');
+        }
     // Quan hệ 1-n với ClassGroup (userID)
     public function classGroups()
     {
