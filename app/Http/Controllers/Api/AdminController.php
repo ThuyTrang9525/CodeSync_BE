@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Student;
+use App\Models\Teacher;
 use App\Models\ClassGroup;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -43,11 +44,25 @@ class AdminController extends Controller
     }
 
     public function markRead($id) {
+    try {
         $noti = Notification::findOrFail($id);
         $noti->isRead = 1;
         $noti->save();
+
         return response()->json(['message' => 'Đã đánh dấu đã đọc']);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
+
+
+public function destroy($id) {
+    $notification = Notification::findOrFail($id);
+    $notification->delete();
+
+    return response()->json(['message' => 'Thông báo đã được xoá']);
+}
+
 
     public function markAsRead(Request $request, $id)
     {
@@ -62,11 +77,7 @@ class AdminController extends Controller
         return response()->json(['message' => 'Marked as read']);
     }
 
-    public function destroy($id) {
-        Notification::destroy($id);
-        return response()->json(['message' => 'Đã xóa']);
-    }
-
+    
     public function logout(Request $request)
     {
         $user = $request->user();
@@ -123,30 +134,46 @@ class AdminController extends Controller
 
    public function storeUser(Request $request)
 {
-    $request->validate([
-        'name' => 'required|string',
-        'email' => 'required|string|email|unique:users,email',
+    // 1. Validate dữ liệu từ form
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users,email',
         'password' => 'required|string|min:6',
         'role' => 'required|in:STUDENT,TEACHER,ADMIN',
     ]);
 
+    // 2. Tạo user mới
     $user = User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => bcrypt($request->password),
-        'role' => $request->role,
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => bcrypt($validated['password']),
+        'role' => $validated['role'],
     ]);
 
-    // Xóa hoặc comment dòng này để không ngắt xử lý
-    // dd($user);
+    // 3. Tạo bản ghi phụ theo role
+    switch ($user->role) {
+        case 'STUDENT':
+            Student::create([
+                'userID' => $user->userID,
+                // thêm các trường khác nếu cần
+            ]);
+            break;
 
-    if ($user->role === 'STUDENT') {
-        Student::create([
-        'userID' => $user->userID, 
-]);
+        case 'TEACHER':
+            Teacher::create([
+                'userID' => $user->userID,
+                // thêm các trường khác nếu cần
+            ]);
+            break;
+
+        // ADMIN không cần tạo gì thêm
     }
 
-    return response()->json($user, 201);
+    // 4. Trả về response JSON
+    return response()->json([
+        'message' => 'User created successfully',
+        'user' => $user
+    ], 201);
 }
 
 
