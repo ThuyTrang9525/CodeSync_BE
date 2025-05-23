@@ -44,7 +44,7 @@ Route::get('/teacher/students/{id}', [TeacherController::class, 'showStudent']);
 //     Route::get('/comments/history/{userId}', [TeacherController::class, 'history']);
 // });
 Route::post('/comments/send', [TeacherController::class, 'send']);
-Route::get('/comments/history/{userId}', [TeacherController::class, 'history']);
+Route::get('/comments/history/{userId}/{classID}', [TeacherController::class, 'history']);
 
 Route::prefix('admin')->group(function () {
     Route::get('users', [AdminController::class, 'indexUsers']);

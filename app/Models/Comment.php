@@ -16,6 +16,7 @@ class Comment extends Model
         'content',
         'planType',
         'isResolved',
+        'classID',
         'createdAt',
         'updatedAt'
     ];

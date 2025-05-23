@@ -138,48 +138,50 @@ class TeacherController extends Controller
         ]);
     }
     public function send(Request $request)
-        {
-            $validated = $request->validate([
-                'receiverID' => 'required|exists:users,userID',
-                'content' => 'required|string',
-                'planID' => 'nullable|integer',
-                'planType' => 'nullable|string'
-            ]);
+{
+    $validated = $request->validate([
+        'receiverID' => 'required|exists:users,userID',
+        'classID' => 'required|exists:class_groups,classID',
+        'content' => 'required|string',
+        'planID' => 'nullable|integer',
+        'planType' => 'nullable|string'
+    ]);
 
-            $comment = Comment::create([
-                'senderID' => Auth::id(),
-                'receiverID' => $validated['receiverID'],
-                'content' => $validated['content'],
-                'planID' => $validated['planID'] ?? 0,
-                'planType' => $validated['planType'] ?? 0,
-                'isResolved' => false,
-                'createdAt' => now(),
-                'updatedAt' => now(),
-            ]);
+    $comment = Comment::create([
+        'senderID' => Auth::id(),
+        'receiverID' => $validated['receiverID'],
+        'classID' => $validated['classID'], 
+        'content' => $validated['content'],
+        'planID' => $validated['planID'] ?? 0,
+        'planType' => $validated['planType'] ?? 0,
+        'isResolved' => false,
+        'createdAt' => now(),
+        'updatedAt' => now(),
+    ]);
 
-            return response()->json($comment, 201);
-    }
+    return response()->json($comment, 201);
+}
 
-    // Lấy lịch sử tin nhắn giữa 2 người
-    public function history($userId)
-    {
-        //  if (!Auth::check()) {
-        //     return response()->json(['error' => 'Unauthenticated'], 401);
-        // }
-        $authId = Auth::id();
 
-        $messages = Comment::where(function ($query) use ($authId, $userId) {
-            $query->where('senderID', $authId)
+   public function history($userId, $classID)
+{
+    $authId = Auth::id();
+
+    $messages = Comment::where('classID', $classID)
+        ->where(function ($query) use ($authId, $userId) {
+            $query->where(function ($q) use ($authId, $userId) {
+                $q->where('senderID', $authId)
                   ->where('receiverID', $userId);
-        })
-        ->orWhere(function ($query) use ($authId, $userId) {
-            $query->where('senderID', $userId)
+            })->orWhere(function ($q) use ($authId, $userId) {
+                $q->where('senderID', $userId)
                   ->where('receiverID', $authId);
+            });
         })
         ->orderBy('createdAt')
         ->get();
 
-        return response()->json($messages);
-    }
+    return response()->json($messages);
+}
+
 
 }
