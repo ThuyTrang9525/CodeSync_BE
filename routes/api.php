@@ -6,8 +6,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\TeacherController;
-
-
+use App\Models\Teacher;
 
 Route::apiResource('/users', UserController::class);
 Route::apiResource('/students', StudentController::class);
@@ -39,6 +38,13 @@ Route::get('/student/notifications/{receiverID}', [StudentController::class, 'ge
 Route::middleware('auth:sanctum')->get('/teacher/classes', [TeacherController::class, 'getTeacherClasses']);
 Route::get('/classes/{classId}/students', [TeacherController::class, 'getStudentsByClass']);
 Route::get('/notifications/{receiverID}', [TeacherController::class, 'getNotificationsByUser']);
+Route::get('/teacher/students/{id}', [TeacherController::class, 'showStudent']);
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::post('/comments/send', [TeacherController::class, 'send']);
+//     Route::get('/comments/history/{userId}', [TeacherController::class, 'history']);
+// });
+Route::post('/comments/send', [TeacherController::class, 'send']);
+Route::get('/comments/history/{userId}', [TeacherController::class, 'history']);
 
 Route::prefix('admin')->group(function () {
     Route::get('users', [AdminController::class, 'indexUsers']);
@@ -70,22 +76,33 @@ Route::prefix('admin')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/student/study-plans/semester/{semester}', [StudentController::class, 'getStudyPlansBySemester']);
-    Route::post('/student/study-plans', [StudentController::class, 'createStudyPlan']);
+    Route::get('/student/study-plans/{id}', [StudentController::class, 'getStudyPlan']);
+    Route::post('/student/study-plans', [StudentController::class, 'createInClassPlan']);
     Route::put('/student/study-plans/{id}', [StudentController::class, 'updateStudyPlan']);
     Route::delete('/student/study-plans/{id}', [StudentController::class, 'deleteStudyPlan']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
     // Self Study Plan APIs
-    Route::get('/student/inclass-plans/semester/{semester}', [StudentController::class, 'getSelfPlansBySemester']);
-    Route::get('/student/inclass-plans/{id}', [StudentController::class, 'getSelfPlan']);
-    Route::post('/student/inclass-plans', [StudentController::class, 'createSelfPlan']);
-    Route::put('/student/inclass-plans/{id}', [StudentController::class, 'updateSelfPlan']);
-    Route::delete('/student/inclass-plans/{id}', [StudentController::class, 'deleteSelfPlan']);
+    Route::get('/student/self-study-plans/semester/{semester}', [StudentController::class, 'getSelfPlansBySemester']);
+    Route::get('/student/self-study-plans/{id}', [StudentController::class, 'getSelfPlan']);
+    Route::post('/student/self-study-plans', [StudentController::class, 'createSelfPlan']);
+    Route::put('/student/self-study-plans/{id}', [StudentController::class, 'updateSelfStudyPlan']);
+    Route::delete('/student/self-study-plans/{id}', [StudentController::class, 'updateSelfStudyPlan']);
     // Study Plans by Semester & Week
     Route::get('/student/study-plans/semester/{semester}/week/{week}', [StudentController::class, 'getStudyPlansBySemesterAndWeek']);
 
     // In-Class Plans by Semester & Week
     Route::get('/student/inclass-plans/semester/{semester}/week/{week}', [StudentController::class, 'getSelfPlansBySemesterAndWeek']);
     Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
+// In-Class Plans by Semester & Week
+Route::get('/student/self-study-plans/semester/{semester}/week/{week}', [StudentController::class, 'getSelfPlansBySemesterAndWeek']);
+Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/comments', [StudentController::class, 'storeComment']);
+    Route::get('/comments', [StudentController::class, 'getComments']);
+    Route::put('/comments/{id}/resolve', [StudentController::class, 'markAsResolved']);
+
+});
 });
