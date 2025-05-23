@@ -18,5 +18,8 @@ class Teacher extends Model
     {
         return $this->hasMany(ClassGroup::class, 'userID');
     }
-
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'userID', 'userID');
+    }
 }
