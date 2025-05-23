@@ -106,3 +106,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 });
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/events', [StudentController::class, 'events']);
+    Route::post('/events', [StudentController::class, 'storeEvent']);
+    Route::put('/events/{id}', [StudentController::class, 'updateEvent']);
+    Route::delete('/events/{id}', [StudentController::class, 'deleteEvent']);
+});

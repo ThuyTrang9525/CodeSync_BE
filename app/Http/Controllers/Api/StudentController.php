@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\Event;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
@@ -681,5 +682,33 @@ public function markAsResolved($commentID)
             'email' => $user->email,
         ]);
     }
- 
+ public function events()
+    {
+        return Event::where('userID', Auth::id())->get();
+    }
+
+    public function storeEvent(Request $request)
+    {
+        return Event::create([
+            'userID' => Auth::id(),
+            'title' => $request->title,
+            'description' => $request->description,
+            'date' => $request->date,
+            'time' => $request->time,
+            'color' => $request->color,
+        ]);
+    }
+
+    public function updateEvent(Request $request, $eventID)
+    {
+        $event = Event::findOrFail($eventID);
+        $event->update($request->only(['title', 'description', 'date', 'time', 'color']));
+        return $event;
+    }
+
+    public function deleteEvent($eventID)
+    {
+        Event::findOrFail($eventID)->delete();
+        return response()->json(['message' => 'Deleted']);
+    }
 }
