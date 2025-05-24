@@ -52,8 +52,11 @@ Route::prefix('admin')->group(function () {
     Route::get('classes', [AdminController::class, 'indexClasses']);
     Route::get('classes/{id}', [AdminController::class, 'showClass']);
     Route::post('classes', [AdminController::class, 'storeClass']);
-    Route::put('classes/{id}', [AdminController::class, 'updateClass']);
+    Route::put('classes/{userID}', [AdminController::class, 'updateClass']);
     Route::delete('classes/{id}', [AdminController::class, 'destroyClass']);
+
+    Route::get('teachers', [AdminController::class, 'getClassesByTeacher']);
+    Route::post('classes', [AdminController::class, 'createClassWithTeacher']);
 
     Route::get('stats', [AdminController::class, 'getStats']);
     Route::get('goals', [AdminController::class, 'getGoals']);

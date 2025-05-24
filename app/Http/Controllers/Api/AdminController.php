@@ -116,6 +116,40 @@ public function destroy($id) {
 }
 
 
+    public function getClassesByTeacher()
+    {
+         $teachers = Teacher::with('user')->get();
+        return response()->json($teachers);    
+    }
+
+    public function createClassWithTeacher(Request $request)
+{
+    $request->validate([
+        'className' => 'required|string|max:255',
+        'userID' => 'required|integer|exists:users,userID',  // Kiểm tra tồn tại userID trong users
+    ]);
+
+    try {
+        // Tạo lớp mới
+        $newClass = new ClassGroup();
+        $newClass->className = $request->className;
+        $newClass->userID = $request->userID; // Gán giáo viên ngay
+        $newClass->save();
+
+        return response()->json([
+            'message' => 'Tạo lớp và gán giáo viên thành công',
+            'class' => $newClass,
+        ], 201);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Server error',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+}
+
+
 
 
 
@@ -228,19 +262,34 @@ public function destroy($id) {
     {
         $request->validate([
             'className' => 'required|string|max:255',
-            'userID' => 'required|exists:users,userID',
+            'userID' => 'required|exists:users,id', 
         ]);
 
-        $classGroup = ClassGroup::create($request->all());
+        $classGroup = ClassGroup::create([
+            'className' => $request->className,
+            'userID' => $request->userID,
+        ]);
+
         return response()->json($classGroup, 201);
     }
 
-    public function updateClass(Request $request, $id)
-    {
-        $classGroup = ClassGroup::findOrFail($id);
-        $classGroup->update($request->all());
-        return response()->json($classGroup);
-    }
+   
+    public function updateClass(Request $request, $classID)
+{
+    $request->validate([
+        'className' => 'required|string|max:255',
+        'userID' => 'nullable|exists:users,userID', 
+    ]);
+
+    $classGroup = ClassGroup::findOrFail($classID); // Sửa tên biến ở đây
+    $classGroup->className = $request->input('className');
+    $classGroup->userID = $request->input('userID');
+    $classGroup->save();
+
+    return response()->json($classGroup);
+}
+
+
 
     public function destroyClass($id)
     {
