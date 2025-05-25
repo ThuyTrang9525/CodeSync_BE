@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\Goal;
 use App\Models\Notification;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 
@@ -297,4 +298,88 @@ public function destroy($id) {
         $classGroup->delete();
         return response()->json(null, 204);
     }
+
+
+    public function getClassWithStudents($classID)
+{
+    $class = ClassGroup::with([
+        'members' => function ($query) {
+            $query->wherePivot('role', 'student')->with('student');
+        },
+        'mainTeacherUser.teacher' // Load cả user và giáo viên của user
+    ])->findOrFail($classID);
+
+    return response()->json([
+        'class' => [
+            'id' => $class->classID,
+            'name' => $class->className,
+        ],
+        'mainTeacher' => $class->mainTeacherUser ? [
+            'userID' => $class->mainTeacherUser->userID,
+            'name' => $class->mainTeacherUser->name,
+            'email' => $class->mainTeacherUser->email,
+            'teacher_info' => $class->mainTeacherUser->teacher ?? null
+        ] : null,
+        'students' => $class->members->map(function ($user) {
+            return [
+                'userID' => $user->userID,
+                'name' => $user->name,
+                'email' => $user->email,
+                'student_info' => $user->student ?? null,
+            ];
+        }),
+    ]);
 }
+
+    public function getUnassignedStudents()
+{
+    $students = Student::select('students.*', 'users.name','users.email') // lấy tất cả trường students + name từ users
+        ->join('users', 'students.userID', '=', 'users.userID')
+        ->whereNotIn('students.userID', function ($query) {
+            $query->select('userID')->from('class_group_student');
+        })
+        ->whereNotIn('students.userID', function ($query) {
+            $query->select('userID')->from('class_members');
+        })
+        ->get();
+
+    return response()->json([
+        'unassigned_students' => $students
+    ]);
+}
+
+
+
+    public function assignStudentToClass(Request $request, $classID)
+    {
+        $request->validate([
+            'userID' => 'required|exists:users,userID',
+        ]);
+
+        $class = ClassGroup::findOrFail($classID);
+        $userID = $request->input('userID');
+
+        // Kiểm tra xem user đã là thành viên chưa
+        $alreadyMember = $class->members()
+            ->where('users.userID', $userID)
+            ->wherePivot('role', 'student')
+            ->exists();
+
+        if ($alreadyMember) {
+            return response()->json([
+                'message' => 'Student is already assigned to this class.'
+            ], 409); 
+        }
+
+        $class->members()->attach($userID, ['role' => 'student']);
+
+        return response()->json([
+            'message' => 'Student assigned to class successfully.'
+        ]);
+    }
+
+
+
+
+
+}   
