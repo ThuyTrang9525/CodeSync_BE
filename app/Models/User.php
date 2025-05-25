@@ -6,6 +6,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -76,4 +77,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class, 'userID', 'userID');
     }
+
+    public function classes(): BelongsToMany
+{
+    return $this->belongsToMany(ClassGroup::class, 'class_members', 'userID', 'classID')
+                ->withPivot('role')
+                ->withTimestamps();
+}
+
 }
