@@ -55,6 +55,10 @@ Route::prefix('admin')->group(function () {
     Route::put('classes/{userID}', [AdminController::class, 'updateClass']);
     Route::delete('classes/{id}', [AdminController::class, 'destroyClass']);
 
+    Route::get('classmate/{classID}', [AdminController::class, 'getClassWithStudents']);
+    Route::get('students/unassigned', [AdminController::class, 'getUnassignedStudents']);
+    Route::post('classes/{classID}/assign-student', [AdminController::class, 'assignStudentToClass']);
+
     Route::get('teachers', [AdminController::class, 'getClassesByTeacher']);
     Route::post('classes', [AdminController::class, 'createClassWithTeacher']);
 
