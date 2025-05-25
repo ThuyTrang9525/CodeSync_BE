@@ -12,6 +12,10 @@ class ClassGroup extends Model
         }
 
         protected $table = 'class_groups'; 
+        protected $fillable = [
+            'className',
+            'userID',
+        ];
         protected $primaryKey = 'classID';
 
 
