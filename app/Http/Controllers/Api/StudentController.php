@@ -146,25 +146,29 @@ class StudentController extends Controller
     /**
      * Display goals for a specific semester.
      */
-    public function getSemesterGoals($semester, $week)
-    {
-        // Get the authenticated user
-        $user = Auth::user();
+   public function getSemesterGoals($semester)
+{
+    $week = request()->query('week');  // Lấy tham số week từ query string
 
-        // Check if the user is a student
-        if ($user->role !== 'STUDENT') {
-            return response()->json(['message' => 'Only students can access goals'], 403);
-        }
-
-        // Get goals for the specified semester
-        $goals = Goal::where('userID', $user->userID)
-            ->where('semester', $semester)
-            ->where('week', $week)
-            ->orderBy('deadline')
-            ->get();
-
-        return GoalResource::collection($goals);
+    if (!$week) {
+        return response()->json(['message' => 'Week parameter is required'], 400);
     }
+
+    $user = Auth::user();
+
+    if ($user->role !== 'STUDENT') {
+        return response()->json(['message' => 'Only students can access goals'], 403);
+    }
+
+    $goals = Goal::where('userID', $user->userID)
+        ->where('semester', $semester)
+        ->where('week', $week)
+        ->orderBy('deadline')
+        ->get();
+
+    return GoalResource::collection($goals);
+}
+
 
     /**
      * Store a newly created goal.
@@ -233,6 +237,7 @@ class StudentController extends Controller
         }
 
         $validated = $request->validate([
+            'title' => 'sometimes|required|string',
             'description' => 'sometimes|required|string',
             'semester' => 'sometimes|required|string',
             'deadline' => 'sometimes|required|date',

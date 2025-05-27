@@ -97,10 +97,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // In-Class Plans by Semester & Week
     Route::get('/student/inclass-plans/semester/{semester}/week/{week}', [StudentController::class, 'getSelfPlansBySemesterAndWeek']);
-    Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
 // In-Class Plans by Semester & Week
 Route::get('/student/self-study-plans/semester/{semester}/week/{week}', [StudentController::class, 'getSelfPlansBySemesterAndWeek']);
-Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/comments', [StudentController::class, 'storeComment']);
