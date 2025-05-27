@@ -80,7 +80,7 @@ Route::prefix('admin')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/student/study-plans/semester/{semester}', [StudentController::class, 'getStudyPlansBySemester']);
     Route::get('/student/study-plans/{id}', [StudentController::class, 'getStudyPlan']);
-    Route::post('/student/study-plans', [StudentController::class, 'createInClassPlan']);
+    Route::post('/student/study-plans', [StudentController::class, 'createStudyPlan']);
     Route::put('/student/study-plans/{id}', [StudentController::class, 'updateStudyPlan']);
     Route::delete('/student/study-plans/{id}', [StudentController::class, 'deleteStudyPlan']);
 });
