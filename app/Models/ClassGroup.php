@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ClassGroup extends Model
 {
@@ -10,8 +11,14 @@ class ClassGroup extends Model
         {
             return $this->belongsTo(Teacher::class, 'userID');
         }
-    protected $table = 'class_groups'; 
-    protected $primaryKey = 'classID';
+
+        protected $table = 'class_groups'; 
+        protected $fillable = [
+            'classID',
+            'className',
+            'userID',
+        ];
+        protected $primaryKey = 'classID';
 
 
     public function students()
@@ -22,5 +29,30 @@ class ClassGroup extends Model
         {
             return $this->belongsTo(User::class, 'userID');
         }
+   
+    public function classGroupStudents()
+        {
+            return $this->hasMany(ClassGroupStudent::class, 'classID', 'classID');
+        }
+
+public function mainTeacherUser()
+{
+    return $this->belongsTo(User::class, 'userID', 'userID');
+}
+
+        public function studentss(): BelongsToMany
+{
+    return $this->belongsToMany(User::class, 'class_group_student', 'classID', 'userID')
+                ->wherePivot('role', 'student');
+}
+
+
+
+    public function members(): BelongsToMany
+{
+    return $this->belongsToMany(User::class, 'class_members', 'classID', 'userID')
+                ->withPivot('role')
+                ->withTimestamps();
+}
 
 }
