@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Teacher;
 use App\Models\Student;
+use App\Models\Goal;
 use App\Models\User;
 use App\Models\Comment;
 use Illuminate\Validation\ValidationException;
@@ -12,6 +13,7 @@ use App\Models\ClassGroup;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class TeacherController extends Controller
 {
@@ -182,5 +184,39 @@ class TeacherController extends Controller
 
     return response()->json($messages);
 }
+
+public function updateGoalByTeacher(Request $request, Goal $goal)
+{
+    $user = Auth::user();
+
+
+    $validated = $request->validate([
+        'deadline' => 'required|date',
+    ]);
+
+    $originalDeadline = $goal->deadline;
+
+    $goal->update([
+        'deadline' => $validated['deadline'],
+    ]);
+
+    if ($originalDeadline !== $validated['deadline']) {
+        Notification::create([
+            'receiverID' => $goal->userID, 
+            'senderID' => $user->userID,   
+            'content' => "The deadline for your goal '{$goal->title}' has been updated to " . Carbon::parse($validated['deadline'])->format('d/m/Y') . ".",
+            'type' => 'goal_deadline_updated',
+            'isRead' => false,
+            'createdAt' => now(),
+            'classID' => $validated['classID'] ?? null,
+        ]);
+    }
+
+    return response()->json([
+        'message' => 'Goal deadline updated and notification sent.',
+        'goal' => $goal,
+    ]);
+}
+
 
 }
