@@ -6,21 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Notification extends Model
 {
-    public $timestamps = false;
-    
+    protected $table = 'notifications';
+    protected $primaryKey = 'notificationID'; // nếu không phải id
+
     protected $fillable = [
-        
-        'receiverID',
-        'senderID',
-        'content',
-        'type',
-        'isRead',
-        'createdAt',
-        'classID',
+        'receiverID', 'content', 'type', 'isRead', 'createdAt',
+        'senderID', 'classID'
     ];
 
-    public function user()
-    {
+    public $timestamps = false; // nếu bạn dùng `createdAt` và không có `updated_at`
+
+    public function user() {
         return $this->belongsTo(User::class, 'receiverID', 'userID');
     }
 }
