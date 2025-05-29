@@ -85,4 +85,9 @@ class User extends Authenticatable
                 ->withTimestamps();
 }
 
+public function certificates()
+{
+    return $this->hasMany(Certificate::class, 'userID', 'userID');
+}
+
 }

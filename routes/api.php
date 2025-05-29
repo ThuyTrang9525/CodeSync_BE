@@ -28,7 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // profile student đã đăng nhập
     Route::get('/student/profile', [StudentController::class, 'getProfile']);
      //cập nhật profile
-    Route::put('/student/profile/{userID}', [UserController::class, 'updateProfile']);
+    Route::post('/student/profile/{userID}', [StudentController::class, 'updateProfile']);
 });
 // Get all notifications for student
 Route::delete('/student/notifications/{notificationID}', [StudentController::class, 'deleteNotification']);
@@ -83,6 +83,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/student/study-plans', [StudentController::class, 'createInClassPlan']);
     Route::put('/student/study-plans/{id}', [StudentController::class, 'updateStudyPlan']);
     Route::delete('/student/study-plans/{id}', [StudentController::class, 'deleteStudyPlan']);
+    // Route::get('/student/profile', [StudentController::class, 'getProfile']);
+    Route::get('/student/certificates', [StudentController::class, 'getCertificates']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {

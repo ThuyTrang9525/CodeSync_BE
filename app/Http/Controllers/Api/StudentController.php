@@ -478,57 +478,78 @@ public function updateSelfStudyPlan(Request $request, $planID)
         }
     }
 
-    //API lấy thông tin profile (chỉ name và email)
 
-    //API render profile
     public function getProfile(Request $request)
+{
+    $user = Auth::user();
+    if (!$user) {
+        return response()->json(['message' => 'Unauthorized'], 401);
+    }
+
+    // Giả sử User model có quan hệ student() trả về model Student
+    $student = $user->student;
+
+    return response()->json([
+        'name' => $user->name,
+        'email' => $user->email,
+        'student' => $student
+    ]);
+}
+
+    public function getCertificates()
     {
         $user = Auth::user();
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        return response()->json([
-            'name' => $user->name,
-            'email' => $user->email,
-        ]);
+
+        // Giả sử User model có quan hệ certificates() trả về danh sách chứng chỉ
+        $certificates = $user->certificates;
+
+        return response()->json($certificates);
     }
-    //API cập nhật profile
+
     public function updateProfile(Request $request, $userID)
-    {
-        $request->validate([
-            'name'         => 'required|string|max:255',
-            'email'        => 'required|email|max:255',
-            'student_code' => 'nullable|string|max:50',
-            'class'        => 'nullable|string|max:50',
-            'phone'        => 'nullable|string|max:20',
-            'address'      => 'nullable|string|max:255',
-            'dob'          => 'nullable|date',
-        ]);
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|max:255',
+        'dateOfBirth' => 'required|date',
+        'gender' => 'required|string',
+        'address' => 'required|string|max:255',
+        'phoneNumber' => 'required|string|max:20',
+        'avatarURL' => 'nullable|url',
+        'enrollmentDate' => 'required|date',
+        'bio' => 'nullable|string',
+    ]);
 
-        // 1. Tìm User
-        $user = User::where('userID', $userID)->first();
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
-        // 2. Update User
-        $user->name  = $request->name;
-        $user->email = $request->email;
-        $user->save();
-
-        // 3. Update Student nếu tồn tại (nếu có user->student)
-        if ($user->student) {
-            $student = $user->student;
-            $student->student_code = $request->student_code;
-            $student->class        = $request->class;
-            $student->phone        = $request->phone;
-            $student->address      = $request->address;
-            $student->dob          = $request->dob;
-            $student->save();
-        }
-
-        return response()->json(['message' => 'Profile updated successfully'], 200);
+    $user = User::where('userID', $userID)->first();
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
     }
+
+    // Cập nhật bảng users
+    $user->name = $validated['name'];
+    $user->email = $validated['email'];
+    $user->save();
+
+    // Cập nhật bảng students
+    $student = $user->student;
+    if ($student) {
+        $student->dateOfBirth = $validated['dateOfBirth'];
+        $student->gender = $validated['gender'];
+        $student->address = $validated['address'];
+        $student->phoneNumber = $validated['phoneNumber'];
+        $student->avatarURL = $validated['avatarURL'] ?? null;
+        $student->enrollmentDate = $validated['enrollmentDate'];
+        $student->bio = $validated['bio'] ?? null;
+        $student->save();
+    }
+
+    return response()->json(['message' => 'Profile updated successfully'], 200);
+}
+
+
      public function getNotificationsByUser($receiverID)
 {
     try {
