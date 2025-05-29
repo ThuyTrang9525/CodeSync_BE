@@ -695,20 +695,37 @@ class StudentController extends Controller
 
     public function storeEvent(Request $request)
     {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after_or_equal:start_time',
+            'color' => 'nullable|string|max:20',
+        ]);
+
         return Event::create([
             'userID' => Auth::id(),
-            'title' => $request->title,
-            'description' => $request->description,
-            'date' => $request->date,
-            'time' => $request->time,
-            'color' => $request->color,
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'start_time' => $validated['start_time'],
+            'end_time' => $validated['end_time'],
+            'color' => $validated['color'] ?? '#000000',
         ]);
     }
 
     public function updateEvent(Request $request, $eventID)
     {
         $event = Event::findOrFail($eventID);
-        $event->update($request->only(['title', 'description', 'date', 'time', 'color']));
+
+        $validated = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'sometimes|nullable|string',
+            'start_time' => 'sometimes|required|date',
+            'end_time' => 'sometimes|required|date|after_or_equal:start_time',
+            'color' => 'sometimes|nullable|string|max:20',
+        ]);
+
+        $event->update($validated);
         return $event;
     }
 
@@ -717,6 +734,8 @@ class StudentController extends Controller
         Event::findOrFail($eventID)->delete();
         return response()->json(['message' => 'Deleted']);
     }
+
+
     // Student Request Support
 
     public function storeSupportRequest(Request $request)
