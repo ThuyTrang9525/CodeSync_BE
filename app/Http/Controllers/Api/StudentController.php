@@ -434,11 +434,10 @@ class StudentController extends Controller
     }
 
 
-    public function getStudentClasses()
+public function getStudentClasses()
     {
         $user = Auth::user();
 
-        // Kiểm tra quyền truy cập
         if (!$user || $user->role !== 'STUDENT') {
             return response()->json([
                 'status' => 'error',
@@ -446,7 +445,6 @@ class StudentController extends Controller
             ], 403);
         }
 
-        // Lấy thông tin sinh viên dựa trên userID
         $student = Student::where('userID', $user->userID)->first();
 
         if (!$student) {
@@ -456,8 +454,7 @@ class StudentController extends Controller
             ], 404);
         }
 
-        // Lấy danh sách lớp học có kèm thông tin giáo viên
-        $classes = $student->classGroups()->with(['teacher.user'])->get();
+        $classes = $student->classGroups()->with('teacher')->get();
 
         return response()->json([
             'student' => $user->name ?? $user->email,
