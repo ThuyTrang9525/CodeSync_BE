@@ -23,11 +23,14 @@ class Teacher extends Model
     'bio',
 ];
 
+    // public function user()
+    // {
+    //     return $this->hasOne(User::class, 'userID','userID');
+    // }
     public function user()
     {
-        return $this->hasOne(User::class, 'userID','userID');
+        return $this->belongsTo(User::class, 'userID', 'userID');
     }
-
     public function classGroups()
     {
         return $this->hasMany(ClassGroup::class, 'userID');
