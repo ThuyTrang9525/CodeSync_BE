@@ -20,7 +20,7 @@ class Event extends Model
     // Nếu bảng không có timestamp tự động created_at, updated_at
     public $timestamps = true;
     protected $fillable = [
-        'userID', 'title', 'description', 'date', 'start_time', 'end_time', 'color', 'time',
+        'userID', 'title', 'description', 'date', 'start_time', 'end_time', 'color',
     ];
 
     // Nếu muốn khai báo quan hệ với User
