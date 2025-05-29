@@ -74,7 +74,7 @@ Route::prefix('admin')->group(function () {
 
     // Route::get('report', [AdminController::class, 'report']);
     Route::get('reports', [AdminController::class, 'getStudentReport']);
-        Route::get('getGoalsbyStudent/{userID}', [AdminController::class, 'getGoalsbyStudent']);
+    Route::get('getGoalsbyStudent/{userID}', [AdminController::class, 'getGoalsbyStudent']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
