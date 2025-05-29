@@ -687,33 +687,50 @@ public function markAsResolved($commentID)
             'email' => $user->email,
         ]);
     }
- public function events()
-    {
-        return Event::where('userID', Auth::id())->get();
-    }
+public function events()
+{
+    return Event::where('userID', Auth::id())->get();
+}
 
-    public function storeEvent(Request $request)
-    {
-        return Event::create([
-            'userID' => Auth::id(),
-            'title' => $request->title,
-            'description' => $request->description,
-            'date' => $request->date,
-            'time' => $request->time,
-            'color' => $request->color,
-        ]);
-    }
+public function storeEvent(Request $request)
+{
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'start_time' => 'required|date',
+        'end_time' => 'required|date|after_or_equal:start_time',
+        'color' => 'nullable|string|max:20',
+    ]);
 
-    public function updateEvent(Request $request, $eventID)
-    {
-        $event = Event::findOrFail($eventID);
-        $event->update($request->only(['title', 'description', 'date', 'time', 'color']));
-        return $event;
-    }
+    return Event::create([
+        'userID' => Auth::id(),
+        'title' => $validated['title'],
+        'description' => $validated['description'],
+        'start_time' => $validated['start_time'],
+        'end_time' => $validated['end_time'],
+        'color' => $validated['color'] ?? '#000000',
+    ]);
+}
 
-    public function deleteEvent($eventID)
-    {
-        Event::findOrFail($eventID)->delete();
-        return response()->json(['message' => 'Deleted']);
-    }
+public function updateEvent(Request $request, $eventID)
+{
+    $event = Event::findOrFail($eventID);
+
+    $validated = $request->validate([
+        'title' => 'sometimes|required|string|max:255',
+        'description' => 'sometimes|nullable|string',
+        'start_time' => 'sometimes|required|date',
+        'end_time' => 'sometimes|required|date|after_or_equal:start_time',
+        'color' => 'sometimes|nullable|string|max:20',
+    ]);
+
+    $event->update($validated);
+    return $event;
+}
+
+public function deleteEvent($eventID)
+{
+    Event::findOrFail($eventID)->delete();
+    return response()->json(['message' => 'Deleted']);
+}
 }
