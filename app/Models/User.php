@@ -84,4 +84,9 @@ class User extends Authenticatable
             ->withPivot('role')
             ->withTimestamps();
     }
-}
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class, 'userID', 'userID');
+    }
+
+    }

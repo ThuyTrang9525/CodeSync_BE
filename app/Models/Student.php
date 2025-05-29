@@ -28,7 +28,10 @@ class Student extends Model
     {
         return $this->hasOne(User::class, 'userID', 'userID');
     }
-
+public function owner()
+    {
+        return $this->belongsTo(User::class, 'userID', 'userID');
+    }
     // Quan hệ với lớp học (dùng userID)
     public function classGroups()
     {
