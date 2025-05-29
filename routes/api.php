@@ -27,9 +27,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-classes', [StudentController::class, 'getStudentClasses']);
     // profile student đã đăng nhập
     Route::get('/student/profile', [StudentController::class, 'getProfile']);
-     //cập nhật profile
+    //cập nhật profile
     Route::put('/student/profile/{userID}', [UserController::class, 'updateProfile']);
+    //Request Support Student
+    Route::post('/support-requests', [StudentController::class, 'storeSupportRequest']);
 });
+Route::get('/teacher/subjects', [TeacherController::class, 'getSubjectsWithTeachers']);
+
 // Get all notifications for student
 Route::delete('/student/notifications/{notificationID}', [StudentController::class, 'deleteNotification']);
 Route::post('/student/notifications/{notificationID}/read', [StudentController::class, 'markAsRead']);
@@ -74,7 +78,7 @@ Route::prefix('admin')->group(function () {
 
     // Route::get('report', [AdminController::class, 'report']);
     Route::get('reports', [AdminController::class, 'getStudentReport']);
-        Route::get('getGoalsbyStudent/{userID}', [AdminController::class, 'getGoalsbyStudent']);
+    Route::get('getGoalsbyStudent/{userID}', [AdminController::class, 'getGoalsbyStudent']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -97,16 +101,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // In-Class Plans by Semester & Week
     Route::get('/student/inclass-plans/semester/{semester}/week/{week}', [StudentController::class, 'getSelfPlansBySemesterAndWeek']);
-// In-Class Plans by Semester & Week
-Route::get('/student/self-study-plans/semester/{semester}/week/{week}', [StudentController::class, 'getSelfPlansBySemesterAndWeek']);
+    // In-Class Plans by Semester & Week
+    Route::get('/student/self-study-plans/semester/{semester}/week/{week}', [StudentController::class, 'getSelfPlansBySemesterAndWeek']);
 
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/comments', [StudentController::class, 'storeComment']);
-    Route::get('/comments', [StudentController::class, 'getComments']);
-    Route::put('/comments/{id}/resolve', [StudentController::class, 'markAsResolved']);
-
-});
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/comments', [StudentController::class, 'storeComment']);
+        Route::get('/comments', [StudentController::class, 'getComments']);
+        Route::put('/comments/{id}/resolve', [StudentController::class, 'markAsResolved']);
+    });
 });
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/events', [StudentController::class, 'events']);
