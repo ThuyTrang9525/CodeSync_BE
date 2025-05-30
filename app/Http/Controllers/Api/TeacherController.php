@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Api;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Teacher;
 use App\Models\Student;
 use App\Models\Goal;
 use App\Models\User;
 use App\Models\Comment;
-use Illuminate\Validation\ValidationException;
 use App\Models\ClassGroup;
 use App\Models\Notification;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class TeacherController extends Controller
@@ -55,7 +55,7 @@ class TeacherController extends Controller
         return response()->json(null, 204);
     }
     //
-     public function getTeacherClasses(Request $request)
+    public function getTeacherClasses(Request $request)
     {
         $user = Auth::user(); 
 
@@ -123,7 +123,7 @@ class TeacherController extends Controller
             'error' => $e->getMessage()
         ], 500);
     }
-}
+    }
     public function showStudent($id)
     {
         $student = Student::with(['user', 'goals', 'studyPlans', 'selfStudyPlans'])->find($id);
@@ -163,60 +163,86 @@ class TeacherController extends Controller
     ]);
 
     return response()->json($comment, 201);
-}
-
-   public function history($userId, $classID)
-{
-    $authId = Auth::id();
-
-    $messages = Comment::where('classID', $classID)
-        ->where(function ($query) use ($authId, $userId) {
-            $query->where(function ($q) use ($authId, $userId) {
-                $q->where('senderID', $authId)
-                  ->where('receiverID', $userId);
-            })->orWhere(function ($q) use ($authId, $userId) {
-                $q->where('senderID', $userId)
-                  ->where('receiverID', $authId);
-            });
-        })
-        ->orderBy('createdAt')
-        ->get();
-
-    return response()->json($messages);
-}
-
-public function updateGoalByTeacher(Request $request, Goal $goal)
-{
-    $user = Auth::user();
-
-
-    $validated = $request->validate([
-        'deadline' => 'required|date',
-    ]);
-
-    $originalDeadline = $goal->deadline;
-
-    $goal->update([
-        'deadline' => $validated['deadline'],
-    ]);
-
-    if ($originalDeadline !== $validated['deadline']) {
-        Notification::create([
-            'receiverID' => $goal->userID, 
-            'senderID' => $user->userID,   
-            'content' => "The deadline for your goal '{$goal->title}' has been updated to " . Carbon::parse($validated['deadline'])->format('d/m/Y') . ".",
-            'type' => 'goal_deadline_updated',
-            'isRead' => false,
-            'createdAt' => now(),
-            'classID' => $validated['classID'] ?? null,
-        ]);
     }
 
-    return response()->json([
-        'message' => 'Goal deadline updated and notification sent.',
-        'goal' => $goal,
-    ]);
-}
+    public function history($userId, $classID)
+   {
+        $authId = Auth::id();
 
+        $messages = Comment::where('classID', $classID)
+            ->where(function ($query) use ($authId, $userId) {
+                $query->where(function ($q) use ($authId, $userId) {
+                    $q->where('senderID', $authId)
+                    ->where('receiverID', $userId);
+                })->orWhere(function ($q) use ($authId, $userId) {
+                    $q->where('senderID', $userId)
+                    ->where('receiverID', $authId);
+                });
+            })
+            ->orderBy('createdAt')
+            ->get();
+
+        return response()->json($messages);
+    }
+
+    public function updateGoalByTeacher(Request $request, Goal $goal)
+    {
+        
+        $validated = $request->validate([
+            'deadline' => 'required|date',
+            'senderID' => 'required|integer',
+        ]);
+
+        $originalDeadline = $goal->deadline;
+
+        $goal->update([
+            'deadline' => $validated['deadline'],
+        ]);
+
+        if ($originalDeadline !== $validated['deadline']) {
+            Notification::create([
+                'receiverID' => $goal->userID, 
+                'senderID' => $validated['senderID'],  
+                'content' => "The deadline for your goal '{$goal->title}' has been updated to " . Carbon::parse($validated['deadline'])->format('d/m/Y') . ".",
+                // 'type' => 'Updated',
+                'isRead' => false,
+                'createdAt' => now(),
+                'classID' => $validated['classID'] ?? null,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Goal deadline updated and notification sent.',
+            'goal' => $goal,
+        ]);
+    }
+    public function getStudentProgress(Request $request)
+    {
+        $email = $request->query('email');
+        $week = $request->query('week');
+
+        if (!$email || !$week) {
+            return response()->json(['error' => 'Missing email or week'], 400);
+        }
+
+        $goals = DB::table('goals')
+            ->join('users', 'goals.userID', '=', 'users.userID')
+            ->where('users.email', $email)
+            ->where('goals.week', $week)
+            ->select('goals.status')
+            ->get();
+
+        $total = $goals->count();
+        $completed = $goals->where('status', 'completed')->count(); 
+        $progress = $total > 0 ? round(($completed / $total) * 100) : 0;
+
+        return response()->json([
+            'email' => $email,
+            'week' => (int) $week,
+            'completed' => $completed,
+            'total' => $total,
+            'progress' => $progress,
+        ]);
+    }
 
 }
