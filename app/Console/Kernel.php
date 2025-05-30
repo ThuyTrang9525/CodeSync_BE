@@ -1,0 +1,1 @@
+$schedule->command('send:goal-reminder')->dailyAt('20:00');

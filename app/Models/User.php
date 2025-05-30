@@ -57,9 +57,9 @@ class User extends Authenticatable
         return $this->hasOne(Student::class, 'userID', 'userID');
     }
     public function teacher()
-        {
-            return $this->hasOne(Student::class, 'userID', 'userID');
-        }
+    {
+        return $this->hasOne(Student::class, 'userID', 'userID');
+    }
     // Quan hệ 1-n với ClassGroup (userID)
     public function classGroups()
     {
@@ -79,10 +79,14 @@ class User extends Authenticatable
     }
 
     public function classes(): BelongsToMany
-{
-    return $this->belongsToMany(ClassGroup::class, 'class_members', 'userID', 'classID')
-                ->withPivot('role')
-                ->withTimestamps();
-}
+    {
+        return $this->belongsToMany(ClassGroup::class, 'class_members', 'userID', 'classID')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class, 'userID', 'userID');
+    }
 
-}
+    }
