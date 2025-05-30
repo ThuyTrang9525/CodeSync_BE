@@ -27,10 +27,10 @@ class ClassGroup extends Model
     {
         return $this->belongsToMany(Student::class, 'class_group_student', 'classID', 'userID');
     }
-    // public function user()
-    // {
-    //     return $this->belongsTo(User::class, 'userID');
-    // }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'userID');
+    }
 
     public function classGroupStudents()
     {
@@ -47,7 +47,6 @@ class ClassGroup extends Model
         return $this->belongsToMany(User::class, 'class_group_student', 'classID', 'userID')
             ->wherePivot('role', 'student');
     }
-
 
 
     public function members(): BelongsToMany

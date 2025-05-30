@@ -247,7 +247,7 @@ public function destroy($id) {
         return response()->json(['message' => 'User deleted successfully']);
     }
 
-    //////////////////////////////////////////////////////////////////////// class
+
     public function indexClasses()
     {
         return ClassGroup::with('user')->get();
