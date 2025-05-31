@@ -432,7 +432,31 @@ class StudentController extends Controller
 
         return response()->json($plan);
     }
+    public function deleteStudyPlan( $planID)
+    {
+        $plan = StudyPlan::findOrFail($planID);
 
+        if ($plan->userID !== Auth::id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $plan->delete();
+
+        return response()->json(['message' => 'Study plan deleted successfully']);
+    }
+     
+    public function deleteSelfStudyPlan($planID)
+    {
+        $plan = SelfStudyPlan::findOrFail($planID);
+
+        if ($plan->userID !== Auth::id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $plan->delete();
+
+        return response()->json(['message' => 'Self-study plan deleted successfully']);
+    }
 
 public function getStudentClasses()
     {
