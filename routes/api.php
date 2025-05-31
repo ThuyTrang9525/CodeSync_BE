@@ -47,6 +47,8 @@ Route::get('/notifications/{receiverID}', [TeacherController::class, 'getNotific
 Route::get('/teacher/students/{id}', [TeacherController::class, 'showStudent']);
 Route::post('/comments/send', [TeacherController::class, 'send']);
 Route::get('/comments/history/{userId}/{classID}', [TeacherController::class, 'history']);
+Route::put('/teacher/goals/{goal}/set-deadline', [TeacherController::class, 'updateGoalByTeacher']);
+Route::get('/week-goals-progress', [TeacherController::class, 'getStudentProgress']);
 
 Route::prefix('admin')->group(function () {
     Route::get('users', [AdminController::class, 'indexUsers']);
