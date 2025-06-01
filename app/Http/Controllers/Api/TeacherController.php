@@ -57,25 +57,33 @@ class TeacherController extends Controller
     }
     //
     public function getTeacherClasses(Request $request)
-    {
-        $user = Auth::user();
+        {
+            $user = Auth::user();
 
-        if ($user->role !== 'TEACHER') {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            if ($user->role !== 'TEACHER') {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $teacher = Teacher::where('userID', $user->userID)->first();
+
+            if (!$teacher) {
+                return response()->json(['message' => 'Teacher not found'], 404);
+            }
+
+            // Lấy danh sách lớp học và load students để đếm
+            $classes = ClassGroup::where('userID', $teacher->userID)
+                ->withCount('students') // Đếm students của mỗi class
+                ->get();
+
+            // Tính tổng số học sinh
+            $totalStudents = $classes->sum('students_count');
+
+            return response()->json([
+                'classes' => $classes,
+                'totalStudents' => $totalStudents
+            ]);
         }
 
-        $teacher = Teacher::where('userID', $user->userID)->first();
-
-        if (!$teacher) {
-            return response()->json(['message' => 'Teacher not found'], 404);
-        }
-
-        $classes = ClassGroup::where('userID', $teacher->userID)->get();
-
-        return response()->json([
-            'classes' => $classes
-        ]);
-    }
     //
     public function getStudentsByClass($classID)
     {
@@ -127,7 +135,7 @@ class TeacherController extends Controller
     }
     public function showStudent($id)
     {
-        $student = Student::with(['user', 'goals', 'studyPlans', 'selfStudyPlans'])->find($id);
+        $student = Student::with(['user', 'goals', 'studyPlans', 'selfStudyPlans','event'])->find($id);
 
         if (!$student) {
             return response()->json(['message' => 'Student not found'], 404);
@@ -139,6 +147,7 @@ class TeacherController extends Controller
             'goals' => $student->goals,
             'study_plans' => $student->studyPlans,
             'self_study_plans' => $student->selfStudyPlans,
+            'event' => $student->event
         ]);
     }
     public function send(Request $request)
@@ -221,8 +230,9 @@ class TeacherController extends Controller
     {
         $email = $request->query('email');
         $week = $request->query('week');
+        $semester = $request->query('semester');
 
-        if (!$email || !$week) {
+        if (!$email || !$week || !$semester) {
             return response()->json(['error' => 'Missing email or week'], 400);
         }
 
@@ -230,6 +240,7 @@ class TeacherController extends Controller
             ->join('users', 'goals.userID', '=', 'users.userID')
             ->where('users.email', $email)
             ->where('goals.week', $week)
+            ->where('goals.semester', $semester)
             ->select('goals.status')
             ->get();
 
@@ -240,6 +251,7 @@ class TeacherController extends Controller
         return response()->json([
             'email' => $email,
             'week' => (int) $week,
+            'semester' => $semester,
             'completed' => $completed,
             'total' => $total,
             'progress' => $progress,
