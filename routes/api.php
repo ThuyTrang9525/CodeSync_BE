@@ -101,7 +101,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/student/self-study-plans/{id}', [StudentController::class, 'getSelfPlan']);
     Route::post('/student/self-study-plans', [StudentController::class, 'createSelfPlan']);
     Route::put('/student/self-study-plans/{id}', [StudentController::class, 'updateSelfStudyPlan']);
-    Route::delete('/student/self-study-plans/{id}', [StudentController::class, 'updateSelfStudyPlan']);
+    Route::delete('/student/self-study-plans/{id}', [StudentController::class, 'deleteSelfStudyPlan']);
     // Study Plans by Semester & Week
     Route::get('/student/study-plans/semester/{semester}/week/{week}', [StudentController::class, 'getStudyPlansBySemesterAndWeek']);
 
