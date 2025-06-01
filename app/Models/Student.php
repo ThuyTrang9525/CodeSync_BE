@@ -57,4 +57,8 @@ public function owner()
     {
         return $this->hasMany(ClassGroupStudent::class, 'userID', 'userID');
     }
+      public function event()
+    {
+        return $this->hasMany(Event::class, 'userID', 'userID');
+    }
 }
